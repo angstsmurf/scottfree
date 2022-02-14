@@ -1,0 +1,266 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXFileReference section */
+		C37CE91427BA6B6A003A6649 /* gtw_blnk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gtw_blnk.h; sourceTree = "<group>"; };
+		C37CE91527BA6B6A003A6649 /* gi_blorb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gi_blorb.c; sourceTree = "<group>"; };
+		C37CE91627BA6B6A003A6649 /* gtw_buf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gtw_buf.h; sourceTree = "<group>"; };
+		C37CE91727BA6B6A003A6649 /* gtmisc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtmisc.c; sourceTree = "<group>"; };
+		C37CE91827BA6B6A003A6649 /* gtfref.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtfref.c; sourceTree = "<group>"; };
+		C37CE91927BA6B6A003A6649 /* cgunigen.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cgunigen.c; sourceTree = "<group>"; };
+		C37CE91A27BA6B6A003A6649 /* gtw_pair.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtw_pair.c; sourceTree = "<group>"; };
+		C37CE91B27BA6B6A003A6649 /* .DS_Store */ = {isa = PBXFileReference; lastKnownFileType = file; path = .DS_Store; sourceTree = "<group>"; };
+		C37CE91C27BA6B6A003A6649 /* gtschan.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtschan.c; sourceTree = "<group>"; };
+		C37CE91D27BA6B6A003A6649 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		C37CE91E27BA6B6A003A6649 /* glk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glk.h; sourceTree = "<group>"; };
+		C37CE91F27BA6B6A003A6649 /* glkstart.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glkstart.h; sourceTree = "<group>"; };
+		C37CE92027BA6B6A003A6649 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		C37CE92127BA6B6A003A6649 /* gtmessag.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtmessag.c; sourceTree = "<group>"; };
+		C37CE92227BA6B6A003A6649 /* gtw_grid.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gtw_grid.h; sourceTree = "<group>"; };
+		C37CE92327BA6B6A003A6649 /* gi_dispa.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gi_dispa.h; sourceTree = "<group>"; };
+		C37CE92427BA6B6A003A6649 /* cgunicod.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cgunicod.c; sourceTree = "<group>"; };
+		C37CE92527BA6B6A003A6649 /* gtoption.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gtoption.h; sourceTree = "<group>"; };
+		C37CE92627BA6B6A003A6649 /* gtw_pair.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gtw_pair.h; sourceTree = "<group>"; };
+		C37CE92727BA6B6A003A6649 /* gi_blorb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gi_blorb.h; sourceTree = "<group>"; };
+		C37CE92827BA6B6A003A6649 /* gtw_buf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtw_buf.c; sourceTree = "<group>"; };
+		C37CE92927BA6B6A003A6649 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		C37CE92A27BA6B6A003A6649 /* gtinput.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtinput.c; sourceTree = "<group>"; };
+		C37CE92B27BA6B6A003A6649 /* gtw_blnk.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtw_blnk.c; sourceTree = "<group>"; };
+		C37CE92C27BA6B6A003A6649 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		C37CE92D27BA6B6A003A6649 /* gtmessin.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtmessin.c; sourceTree = "<group>"; };
+		C37CE92E27BA6B6A003A6649 /* cgdate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = cgdate.c; sourceTree = "<group>"; };
+		C37CE92F27BA6B6A003A6649 /* glkstart.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = glkstart.c; sourceTree = "<group>"; };
+		C37CE93027BA6B6A003A6649 /* gtevent.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtevent.c; sourceTree = "<group>"; };
+		C37CE93127BA6B6A003A6649 /* gtstyle.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtstyle.c; sourceTree = "<group>"; };
+		C37CE93227BA6B6A003A6649 /* readme.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
+		C37CE93327BA6B6A003A6649 /* gi_dispa.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gi_dispa.c; sourceTree = "<group>"; };
+		C37CE93427BA6B6A003A6649 /* gtblorb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtblorb.c; sourceTree = "<group>"; };
+		C37CE93527BA6B6A003A6649 /* .git */ = {isa = PBXFileReference; lastKnownFileType = folder; path = .git; sourceTree = "<group>"; };
+		C37CE93627BA6B6A003A6649 /* gtw_grid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtw_grid.c; sourceTree = "<group>"; };
+		C37CE93727BA6B6A003A6649 /* gtwindow.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtwindow.c; sourceTree = "<group>"; };
+		C37CE93827BA6B6A003A6649 /* gtgestal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtgestal.c; sourceTree = "<group>"; };
+		C37CE93927BA6B6A003A6649 /* glkterm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glkterm.h; sourceTree = "<group>"; };
+		C37CE93A27BA6B6A003A6649 /* gtstream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtstream.c; sourceTree = "<group>"; };
+		C37CE93B27BA6B6A003A6649 /* Make.glkterm */ = {isa = PBXFileReference; lastKnownFileType = text; path = Make.glkterm; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		C37CE90E27BA6B6A003A6649 = {
+			isa = PBXGroup;
+			children = (
+				C37CE91427BA6B6A003A6649 /* gtw_blnk.h */,
+				C37CE91527BA6B6A003A6649 /* gi_blorb.c */,
+				C37CE91627BA6B6A003A6649 /* gtw_buf.h */,
+				C37CE91727BA6B6A003A6649 /* gtmisc.c */,
+				C37CE91827BA6B6A003A6649 /* gtfref.c */,
+				C37CE91927BA6B6A003A6649 /* cgunigen.c */,
+				C37CE91A27BA6B6A003A6649 /* gtw_pair.c */,
+				C37CE91B27BA6B6A003A6649 /* .DS_Store */,
+				C37CE91C27BA6B6A003A6649 /* gtschan.c */,
+				C37CE91D27BA6B6A003A6649 /* LICENSE */,
+				C37CE91E27BA6B6A003A6649 /* glk.h */,
+				C37CE91F27BA6B6A003A6649 /* glkstart.h */,
+				C37CE92027BA6B6A003A6649 /* Makefile */,
+				C37CE92127BA6B6A003A6649 /* gtmessag.c */,
+				C37CE92227BA6B6A003A6649 /* gtw_grid.h */,
+				C37CE92327BA6B6A003A6649 /* gi_dispa.h */,
+				C37CE92427BA6B6A003A6649 /* cgunicod.c */,
+				C37CE92527BA6B6A003A6649 /* gtoption.h */,
+				C37CE92627BA6B6A003A6649 /* gtw_pair.h */,
+				C37CE92727BA6B6A003A6649 /* gi_blorb.h */,
+				C37CE92827BA6B6A003A6649 /* gtw_buf.c */,
+				C37CE92927BA6B6A003A6649 /* main.c */,
+				C37CE92A27BA6B6A003A6649 /* gtinput.c */,
+				C37CE92B27BA6B6A003A6649 /* gtw_blnk.c */,
+				C37CE92C27BA6B6A003A6649 /* .gitignore */,
+				C37CE92D27BA6B6A003A6649 /* gtmessin.c */,
+				C37CE92E27BA6B6A003A6649 /* cgdate.c */,
+				C37CE92F27BA6B6A003A6649 /* glkstart.c */,
+				C37CE93027BA6B6A003A6649 /* gtevent.c */,
+				C37CE93127BA6B6A003A6649 /* gtstyle.c */,
+				C37CE93227BA6B6A003A6649 /* readme.txt */,
+				C37CE93327BA6B6A003A6649 /* gi_dispa.c */,
+				C37CE93427BA6B6A003A6649 /* gtblorb.c */,
+				C37CE93527BA6B6A003A6649 /* .git */,
+				C37CE93627BA6B6A003A6649 /* gtw_grid.c */,
+				C37CE93727BA6B6A003A6649 /* gtwindow.c */,
+				C37CE93827BA6B6A003A6649 /* gtgestal.c */,
+				C37CE93927BA6B6A003A6649 /* glkterm.h */,
+				C37CE93A27BA6B6A003A6649 /* gtstream.c */,
+				C37CE93B27BA6B6A003A6649 /* Make.glkterm */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		C37CE91327BA6B6A003A6649 /* glkterm */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = C37CE93C27BA6B6A003A6649 /* Build configuration list for PBXLegacyTarget "glkterm" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = /Users/administrator/scottfree/glkterm;
+			dependencies = (
+			);
+			name = glkterm;
+			passBuildSettingsInEnvironment = 1;
+			productName = glkterm;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		C37CE90F27BA6B6A003A6649 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1320;
+			};
+			buildConfigurationList = C37CE91227BA6B6A003A6649 /* Build configuration list for PBXProject "glkterm" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C37CE90E27BA6B6A003A6649;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C37CE91327BA6B6A003A6649 /* glkterm */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		C37CE91027BA6B6A003A6649 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = "";
+			};
+			name = Debug;
+		};
+		C37CE91127BA6B6A003A6649 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				SDKROOT = "";
+			};
+			name = Release;
+		};
+		C37CE93D27BA6B6A003A6649 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = glkterm;
+			};
+			name = Debug;
+		};
+		C37CE93E27BA6B6A003A6649 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = glkterm;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C37CE91227BA6B6A003A6649 /* Build configuration list for PBXProject "glkterm" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C37CE91027BA6B6A003A6649 /* Debug */,
+				C37CE91127BA6B6A003A6649 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C37CE93C27BA6B6A003A6649 /* Build configuration list for PBXLegacyTarget "glkterm" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C37CE93D27BA6B6A003A6649 /* Debug */,
+				C37CE93E27BA6B6A003A6649 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C37CE90F27BA6B6A003A6649 /* Project object */;
+}

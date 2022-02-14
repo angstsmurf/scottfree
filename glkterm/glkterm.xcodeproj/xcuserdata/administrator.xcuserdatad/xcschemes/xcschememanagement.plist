@@ -4,15 +4,18 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>glkmain.xcscheme_^#shared#^_</key>
+		<key>glkterm.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>0</integer>
 		</dict>
-		<key>scottfree.xcscheme_^#shared#^_</key>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>C37CE91327BA6B6A003A6649</key>
 		<dict>
-			<key>orderHint</key>
-			<integer>2</integer>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>
