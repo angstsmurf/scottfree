@@ -239,7 +239,6 @@ void load_TI994A_dict(int vorn, uint16_t table, int num_words, const char **dict
         dict[i] = MemAlloc(word_len + 1);
 
         strncpy((char *)dict[i], w1, word_len);
-        memcpy((char *)dict[i] + word_len, "\0", 1);
 
         i += 1;
     }
@@ -593,7 +592,7 @@ void read_implicit(struct DATAHEADER dh)
 
         ReadTI99Action(0, noun, ptr + 2, size - 2);
         fprintf(stderr, "Created action %d\n", GameHeader.NumActions);
-        print_action(GameHeader.NumActions);
+//        print_action(GameHeader.NumActions);
 
         if(ptr[1] == 0)
             loop_flag = 1;
@@ -809,7 +808,7 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     read_implicit(dh);
     read_explicit(dh);
 
-    print_actions();
+//    print_actions();
 
     return TI994A;
 }
