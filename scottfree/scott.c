@@ -1321,6 +1321,7 @@ static int PerformLine(int ct)
 	act[2]/=150;
 	cc=0;
 	pptr=0;
+    const char *message;
 	while(cc<4)
 	{
 #ifdef DEBUG_ACTIONS
@@ -1331,20 +1332,26 @@ static int PerformLine(int ct)
 #ifdef DEBUG_ACTIONS
 			fprintf(stderr, "Action: print message %d: \"%s\"\n", act[cc], Messages[act[cc]]);
 #endif
-			Output(Messages[act[cc]]);
-			const char lastchar = Messages[act[cc]][strlen(Messages[act[cc]]) - 1];
-			if (lastchar != 13 && lastchar != 10)
-				Output(sys[MESSAGE_DELIMITER]);
-		}
-		else if(act[cc]>101)
-		{
+            message = Messages[act[cc]];
+            if (message != NULL && message[0] != 0) {
+                Output(message);
+                const char lastchar = message[strlen(message) - 1];
+                if (lastchar != 13 && lastchar != 10)
+                    Output(sys[MESSAGE_DELIMITER]);
+            }
+        }
+        else if(act[cc]>101)
+        {
 #ifdef DEBUG_ACTIONS
-			fprintf(stderr, "Action: print message %d: \"%s\"\n", act[cc]-50, Messages[act[cc]-50]);
+            fprintf(stderr, "Action: print message %d: \"%s\"\n", act[cc]-50, Messages[act[cc]-50]);
 #endif
-			Output(Messages[act[cc]-50]);
-			const char lastchar = Messages[act[cc]-50][strlen(Messages[act[cc]-50]) - 1];
-			if (lastchar != 13 && lastchar != 10)
-				Output(sys[MESSAGE_DELIMITER]);
+            message = Messages[act[cc]-50];
+            if (message != NULL && message[0] != 0) {
+                Output(message);
+                const char lastchar = message[strlen(message) - 1];
+                if (lastchar != 13 && lastchar != 10)
+                    Output(sys[MESSAGE_DELIMITER]);
+            }
 		}
 		else switch(act[cc])
 		{
