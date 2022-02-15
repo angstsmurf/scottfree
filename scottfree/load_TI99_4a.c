@@ -362,21 +362,17 @@ void CreateTRS80Action(int verb, int noun, uint16_t *conditions, int numconditio
 
     GameHeader.NumActions++;
 
+    int na = GameHeader.NumActions;
+
+    if (na >= 399)
+        Fatal("Too many actions created!");
+
     if (numconditions > 5)
         fprintf(stderr, "Error: %d conditions!\n", numconditions);
     if (numparameters > 5)
         fprintf(stderr, "Error: %d parameters!\n", numparameters);
     if (numcommands > 4)
         fprintf(stderr, "Error: %d commands!\n", numcommands);
-
-    int na = GameHeader.NumActions;
-
-
-//    if (Actions) {
-//        Actions = realloc(Actions, sizeof(Action) * (GameHeader.NumActions + 1));
-//    } else {
-//        Actions = MemAlloc(sizeof(Action));
-//    }
 
     Action *action = Actions + na;
 
@@ -610,7 +606,7 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     GameHeader.NumItems=ni;
     Items=(Item *)MemAlloc(sizeof(Item)*(ni+1));
     na = 400;
-    GameHeader.NumActions= - 1;
+    GameHeader.NumActions = -1;
     Actions=(Action *)MemAlloc(sizeof(Action)*(na+1));
 
     GameHeader.NumWords=nw;
@@ -747,6 +743,11 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     read_implicit(dh);
     read_explicit(dh);
 
+    GameHeader.NumActions--;
+    Action *a = (Action *)MemAlloc(sizeof(Action)*(GameHeader.NumActions+1));
+    memcpy(a, Actions, sizeof(Action)*(GameHeader.NumActions+1));
+    free(Actions);
+    Actions = a;
+
     return TI994A;
 }
-
