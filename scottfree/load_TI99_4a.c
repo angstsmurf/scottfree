@@ -497,6 +497,12 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
         int index = getEntryIndex(value);
         if (index == -1) {
             if (value < 0xDB) {
+                if (numcommands == 3 && ptr[i + 1] != 0xff && i < size - 1) {
+                    try_at = i;
+                    commands[numcommands++] = 73;
+                    fprintf(stderr, "Creating a FAKE continue action!\n");
+                    break;
+                }
                 fprintf(stderr, "(%x) Print message %d: \"%s\"\n", value, value, Messages[value]);
                 if (value < 51) {
                     commands[numcommands++] = value;
