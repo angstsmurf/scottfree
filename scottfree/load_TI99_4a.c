@@ -422,6 +422,10 @@ int getEntryIndex(int opcode) {
 
 void CreateTRS80Action(int verb, int noun, uint16_t *conditions, int numconditions, uint16_t *commands, int numcommands, uint16_t *parameters, int numparameters) {
 
+    if (numconditions == 0 && numcommands == 1 && commands[0] == 73) {
+        fprintf(stderr, "Error! Empty action with continue!\n");
+        return;
+    }
 
     GameHeader.NumActions++;
 
