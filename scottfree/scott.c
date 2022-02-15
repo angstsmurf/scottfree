@@ -1379,7 +1379,9 @@ static int PerformLine(int ct)
 				Look();
 				break;
 			case 55:
+#ifdef DEBUG_ACTIONS
 				fprintf(stderr, "Item %d (%s) is removed from the game (put in room 0).\n", param[pptr], Items[param[pptr]].Text);
+#endif
 				Items[param[pptr++]].Location=0;
 				break;
 			case 56:
