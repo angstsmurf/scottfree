@@ -116,13 +116,13 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud);
 
 GameIDType DetectTI994A(uint8_t **sf, size_t *extent) {
 
-    int offset = FindCode("\xe2\x31\x10\x18\x0c\x07\x03\x00\x4c\x90\x20\x40" , 0);
+    int offset = FindCode("\x30\x30\x30\x30\x00\x30\x30\x00\x28\x28" , 0);
     if (offset == -1)
         return UNKNOWN_GAME;
     else
         fprintf(stderr, "This is a TI99/4A game.\n");
 
-    file_baseline_offset = offset - 0x4c0;
+    file_baseline_offset = offset - 0x589;
     fprintf(stderr, "file_baseline_offset:%d\n", file_baseline_offset);
 
     struct DATAHEADER     dh;
@@ -178,7 +178,7 @@ char *get_TI994A_string(uint16_t table, int table_offset)
     uint8_t buffer[1024];
     size_t length, total_length = 0;
 
-    uint8_t *game = entire_file + file_baseline_offset;
+    uint8_t *game = entire_file;
 
     msgx=game+fix_address(fix_word(table));
 
@@ -353,8 +353,11 @@ int getEntryIndex(int opcode) {
 void CreateTRS80Action(int verb, int noun, uint16_t *conditions, int numconditions, uint16_t *commands, int numcommands, uint16_t *parameters, int numparameters) {
 
     if (numconditions == 0 && numcommands == 1 && commands[0] == 73) {
-        fprintf(stderr, "Error! Empty action with continue!\n");
-        return;
+        fprintf(stderr, "Empty action with single continue?\n");
+    }
+
+    if (numconditions == 1 && numcommands == 1 && commands[0] == 93 && conditions[0] == 1) {
+        fprintf(stderr, "Empty action with single fake continue?\n");
     }
 
     GameHeader.NumActions++;
@@ -418,7 +421,7 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
             break;
         int index = getEntryIndex(value);
         if (index == -1) {
-            if (value < 0xDB) {
+            if (value < 0xdb) {
                 if (numcommands == 3 && ptr[i + 1] != 0xff && i < size - 1) {
                     try_at = i;
                     commands[numcommands++] = 93;
@@ -682,7 +685,7 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     while(ct<nr+1)
     {
         for (int j= 0; j < 6; j++) {
-            rp->Exits[j] = *(ptr++);
+            rp->Exits[j] = *(ptr++ - file_baseline_offset);
         }
         ct++;
         rp++;
@@ -696,7 +699,7 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     ct=0;
     ip=Items;
     while(ct<ni+1) {
-        ip->Location = *(ptr++);
+        ip->Location = *(ptr++ - file_baseline_offset);
         ip->InitialLoc=ip->Location;
         ip++;
         ct++;
@@ -731,7 +734,7 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     int objectlinks[ni + 1];
 
     do {
-        objectlinks[ct] = *(ptr++);
+        objectlinks[ct] = *(ptr++ - file_baseline_offset);
         if (objectlinks[ct]) {
             ip->AutoGet = (char *)Nouns[objectlinks[ct]];
         } else {
