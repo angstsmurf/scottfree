@@ -27,23 +27,23 @@ struct DATAHEADER {
     uint8_t    begin_locn            PACKED;        /* room to start in */
     uint8_t    num_treasures         PACKED;        /* number of treasures */
     uint8_t    cmd_length            PACKED;        /* number of letters in commands */
-    uint16_t    light_turns          PACKED;        /* max number of turns light lasts */
+    uint16_t   light_turns           PACKED;        /* max number of turns light lasts */
     uint8_t    treasure_locn         PACKED;        /* location of where to store treasures */
     uint8_t    strange               PACKED;        /* !?! not known. */
 
-    uint16_t    p_obj_table          PACKED;        /* pointer to object table */
-    uint16_t    p_orig_items         PACKED;        /* pointer to original items */
-    uint16_t    p_obj_link           PACKED;        /* pointer to link table from noun to object */
-    uint16_t    p_obj_descr          PACKED;        /* pointer to object descriptions */
-    uint16_t    p_message            PACKED;        /* pointer to message pointers */
-    uint16_t    p_room_exit          PACKED;        /* pointer to room exits table */
-    uint16_t    p_room_descr         PACKED;        /* pointer to room descr table */
+    uint16_t   p_obj_table           PACKED;        /* pointer to object table */
+    uint16_t   p_orig_items          PACKED;        /* pointer to original items */
+    uint16_t   p_obj_link            PACKED;        /* pointer to link table from noun to object */
+    uint16_t   p_obj_descr           PACKED;        /* pointer to object descriptions */
+    uint16_t   p_message             PACKED;        /* pointer to message pointers */
+    uint16_t   p_room_exit           PACKED;        /* pointer to room exits table */
+    uint16_t   p_room_descr          PACKED;        /* pointer to room descr table */
 
-    uint16_t    p_noun_table         PACKED;        /* pointer to noun table */
-    uint16_t    p_verb_table         PACKED;        /* pointer to verb table */
+    uint16_t   p_noun_table          PACKED;        /* pointer to noun table */
+    uint16_t   p_verb_table          PACKED;        /* pointer to verb table */
 
-    uint16_t    p_explicit           PACKED;        /* pointer to explicit action table */
-    uint16_t    p_implicit           PACKED;        /* pointer to implicit actions */
+    uint16_t   p_explicit            PACKED;        /* pointer to explicit action table */
+    uint16_t   p_implicit            PACKED;        /* pointer to implicit actions */
 };
 
 int max_messages;
@@ -68,7 +68,6 @@ uint16_t fix_word(uint16_t word)
 uint16_t get_word(uint8_t *mem)
 {
     uint16_t x;
-
 #ifdef WE_ARE_BIG_ENDIAN
     x=*(uint16_t *)mem;
 #else
@@ -246,80 +245,12 @@ void load_TI994A_dict(int vorn, uint16_t table, int num_words, const char **dict
 
 struct Keyword
 {
-    char     *name;
-    int        opcode;
-    int        count;
+    char *name;
+    int opcode;
+    int count;
     int tsr80equiv;
     int swapargs;
 };
-
-// From Scott2Zip source
-/*%action_xlat = (
- 0,  '00 0',        # No operation
- 52, '0xdb 1',      # Get item (check that player can carry it)
- 53, '0xdc 1',      # Drop item
- 54, '0xdd 1',      # Move player to the given room
- 55, '0xde 1',      # Move item to room 0
- 56, '0xdf 0',      # Set darkness flag (flag 15)
- 57, '0xe0 0',      # Clear darkness flag (flag 15)
- 58, '0xe1 1',      # Set given bit flag
- 59, '0xde 1',      # Same as 55???
- 60, '0xe2 1',      # Clear given bit flag
- 61, '0xe5 0',      # Kill player
- 62, '0xe6 2 1',    # Put item in given room
- 63, '0xe7 0',      # Game over
- 64, '0xf0 0',      # Describe room
- 65, '0xe8 0',      # Score
- 66, '0xe9 0',      # Inventory
- 67, '0xe3 0',      # Set bit flag 0
- 68, '0xe4 0',      # Clear bit flag 0
- 69, '0xea 0',      # Refill lamp
- 70, '0 0',         # Ignore
- 71, '0xeb 0',      # Save game
- 72, '0xec 2 1',    # Swap the locations of the given items
- 73, '0xda 0',      # Continue -- specially handled
- 74, '0xed 1',      # Give item to player (no check that it can
- # carried)
- 75, '0xee 2 0',    # Put item1 with item2
- 76, '0xf1 0',      # Look
- 77, '0xf3 0',      # Decrement counter
- 78, '0xf4 0',      # Print counter
- 79, '0xd5 1',      # Set counter -- translated to home-made
- # opcode which supports 16 bits
- 80, '0xf8 0',      # Swap location with saved location 0
- 81, '0xfa 1',      # Swap counter with given saved counter
- 82, '0xf6 1',      # Add argument to counter
- 83, '0xf7 1',      # Subtract argument from counter
- 84, '0xfc 0',      # Echo last noun entered without new line
- 85, '0xfb 0',      # Echo last noun entered with new line
- 86, '0xfd 0',      # New line
- 87, '0xf9 1',      # Swap location with given saved location
- 88, '0xfe 0',      # Wait two seconds
- 89, '0 1',         # Draw picture -- ignore
- );*/
-
-/*%condition_xlat = (
- 1,  0xb7,    # Item carried
- 2,  0xb8,    # Item in current room
- 3,  0xb9,    # Item carried or in current room
- 4,  0xbf,    # Player in given room
- 5,  0xba,    # Item not in current room
- 6,  0xbb,    # Item not carried
- 7,  0xc0,    # Player not in given room
- 8,  0xc1,    # Given bit flag is set
- 9,  0xc2,    # Given bit flag is cleared
- 10, 0xc3,    # Something carried (no argument)
- 11, 0xc4,    # Nothing carried (no argument)
- 12, 0xbc,    # Item not carried nor in current room
- 13, 0xbd,    # Item not in room 0
- 14, 0xbe,    # Item in room 0
- 15, 0xc5,    # Counter <= argument
- 16, 0xc6,    # Counter > argument
- 17, 0xc8,    # Item in initial room
- 18, 0xc9,    # Item not in initial room
- 19, 0xc7,    # Counter == argument
- );*/
-
 
 struct Keyword actions[] =
 {
@@ -398,7 +329,6 @@ struct Keyword actions[] =
     {"add",            0xF6, 1, 82 },
     {"sub",            0xF7, 1, 83 },
 
-    /* TODO : implement Select RV (0xF8) and Swap RV (0xF9) */
     {"select_rv",      0xF8, 0, 80 },
     {"swap_rv",        0xF9, 1, 87 },
 
@@ -438,11 +368,6 @@ void CreateTRS80Action(int verb, int noun, uint16_t *conditions, int numconditio
 
     int na = GameHeader.NumActions;
 
-    fprintf(stderr, "\nTRS80 Action %d  with verb: %d noun %d \n", GameHeader.NumActions, verb, noun);
-
-    fprintf(stderr, "Number of conditions: %d\n", numconditions);
-    fprintf(stderr, "Number of parameters: %d\n", numparameters);
-
 
 //    if (Actions) {
 //        Actions = realloc(Actions, sizeof(Action) * (GameHeader.NumActions + 1));
@@ -451,39 +376,26 @@ void CreateTRS80Action(int verb, int noun, uint16_t *conditions, int numconditio
 //    }
 
     Action *action = Actions + na;
-    fprintf(stderr, "Creating action %d\n", na);
 
     action->Vocab = 150 * verb + noun;
-
-    fprintf(stderr, "Vocab 150 * verb (%d) + noun (%d) = %d \n", verb, noun, action->Vocab);
 
 //    5 repeats of condition+20*value
 
     for (int i = 0; i < numconditions; i++) {
         action->Condition[i] = conditions[i] + 20 * parameters[i];
-        fprintf(stderr, "Condition[%d] = %d + 20 * parameter %d = %d\n", i, conditions[i], parameters[i], action->Condition[i]);
     }
     if (numparameters > numconditions) {
         for (int i = numconditions; i < numparameters; i++) {
             action->Condition[i] = 20 * parameters[i];
-            fprintf(stderr, "Condition[%d] = 0 + 20 * parameter %d = %d\n", i, parameters[i], action->Condition[i]);
         }
     }
 
     action->Action[0] = 150 * commands[0] + commands[1];
-    fprintf(stderr, "Action[0] = 150 * commands[0] (%d) + commands[1] (%d) = %d\n", commands[0], commands[1], action->Action[0]);
-
     action->Action[1] = 150 * commands[2] + commands[3];
-    fprintf(stderr, "Action[1] = 150 * commands[2] (%d) + commands[3] (%d) = %d\n", commands[2], commands[3], action->Action[1]);
 }
 
 
 void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_condition) {
-    fprintf(stderr, "\nTI99 action with verb: %d (%s) ", verb, Verbs[verb]);
-    fprintf(stderr, "%s: %d", verb == 0 ? "chance" : "noun", noun);
-    if (GameHeader.NumWords >= noun && verb != 0)
-        fprintf(stderr, "(%s)", Nouns[noun]);
-    fprintf(stderr, "\n");
     uint16_t conditions[5] = { 0,0,0,0,0 };
     uint16_t commands[4] = { 0,0,0,0 };
     uint16_t parameters[5] = { 0,0,0,0,0 };
@@ -514,19 +426,17 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
                     fprintf(stderr, "Creating a FAKE continue action!\n");
                     break;
                 }
-                fprintf(stderr, "(%x) Print message %d: \"%s\"\n", value, value, Messages[value]);
+//              Print message (value)
                 if (value < 52) {
                     commands[numcommands++] = value;
                 } else {
                     commands[numcommands++] = 50 + value;
                 }
-                fprintf(stderr, "Set commands[%d] = %d\n", numcommands - 1, commands[numcommands - 1]);
             } else
                 fprintf(stderr, "Error! Invalid opcode at %d! (%x)\n", i, value);
             continue;
         }
         struct Keyword entry = actions[index];
-        fprintf(stderr, "%s at %X: %s (%x).", value > 0xc9 ? "action" : "condition",  i, entry.name, value);
         int is0xf2 = (value == 0xf2);
         int is0xda = (value == 0xda);
 
@@ -546,7 +456,6 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
                 break;
             }
             commands[numcommands++] = entry.tsr80equiv;
-            fprintf(stderr, "Set commands[%d] = %d\n", numcommands - 1, commands[numcommands - 1]);
         } else {
             if (numconditions == 5) {
                 try_at = i;
@@ -556,21 +465,16 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
                 break;
             }
             conditions[numconditions++] = entry.tsr80equiv;
-            fprintf(stderr, "Set conditions[%d] = %d\n", numconditions - 1, conditions[numconditions - 1]);
         }
-        if (entry.count && !is0xda) {
-            fprintf(stderr, " %d parameter%s: ", entry.count, entry.count > 1 ? "s" : "");
-        } else if (value <= 0xc9)
+        if ((!entry.count || !is0xda) && value <= 0xc9)
              parameters[numparameters++] = 0;
 
         for (int j = 0; j < entry.count; j++) {
             if (is0xda) {
                 continue;
             } else if (is0xf2) {
-                fprintf(stderr, "0x01 (1)");
                 parameters[numparameters++] = 1;
             } else {
-                fprintf(stderr, "0x%x (%d)", ptr[1+i+j],  ptr[1+i+j]);
                 parameters[numparameters++] = ptr[1+i+j];
             }
         }
@@ -594,7 +498,6 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
     if (try_at) {
         ReadTI99Action(0,0, ptr + try_at, size - try_at, extra_condition);
     }
-    fprintf(stderr, "\n\n");
 }
 
 void print_action(int index);
@@ -617,11 +520,9 @@ void read_implicit(struct DATAHEADER dh)
     {
         int noun = ptr[0];
         int size = ptr[1];
-        fprintf(stderr, "size: %d\n", size);
 
         ReadTI99Action(0, noun, ptr + 2, size - 2, 0);
-        fprintf(stderr, "Created action %d\n", GameHeader.NumActions);
-//        print_action(GameHeader.NumActions);
+//        fprintf(stderr, "Created action %d\n", GameHeader.NumActions);
 
         if(ptr[1] == 0)
             loop_flag = 1;
@@ -705,7 +606,7 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
 
     GameHeader.NumItems=ni;
     Items=(Item *)MemAlloc(sizeof(Item)*(ni+1));
-    na = 300;
+    na = 400;
     GameHeader.NumActions= - 1;
     Actions=(Action *)MemAlloc(sizeof(Action)*(na+1));
 
@@ -735,10 +636,11 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
 
     do {
         rp->Text = get_TI994A_string(dh.p_room_descr, ct);
+        if (loud)
             fprintf(stderr, "Room %d: %s\n", ct, rp->Text);
-            rp->Image = 255;
-            ct++;
-            rp++;
+        rp->Image = 255;
+        ct++;
+        rp++;
     } while (ct<nr+1);
 
 #pragma mark messages
@@ -747,7 +649,8 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     while(ct<mn+1)
     {
         Messages[ct] = get_TI994A_string(dh.p_message, ct);
-        fprintf(stderr, "Message %d: %s\n", ct, Messages[ct]);
+        if (loud)
+            fprintf(stderr, "Message %d: %s\n", ct, Messages[ct]);
         ct++;
     }
 
@@ -758,13 +661,15 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
         ip->Text = get_TI994A_string(dh.p_obj_descr, ct);
         if (ip->Text && ip->Text[0] == '*')
             tr++;
-        fprintf(stderr, "Item %d: %s\n", ct, ip->Text);
+        if (loud)
+            fprintf(stderr, "Item %d: %s\n", ct, ip->Text);
         ct++;
         ip++;
     } while(ct<ni+1);
 
     GameHeader.Treasures = tr;
-    fprintf(stderr, "Number of treasures %d\n", GameHeader.Treasures);
+    if (loud)
+        fprintf(stderr, "Number of treasures %d\n", GameHeader.Treasures);
 
 #pragma mark room connections
 
@@ -808,10 +713,12 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     for (int i = 0; i <= dh.num_verbs - dh.num_nouns; i++)
         Nouns[dh.num_nouns + i] = ".\0";
 
-    for (int i = 0; i <= GameHeader.NumWords; i++)
-        fprintf(stderr, "Verb %d: %s\n", i, Verbs[i]);
-    for (int i = 0; i <= GameHeader.NumWords; i++)
-        fprintf(stderr, "Noun %d: %s\n", i, Nouns[i]);
+    if (loud) {
+        for (int i = 0; i <= GameHeader.NumWords; i++)
+            fprintf(stderr, "Verb %d: %s\n", i, Verbs[i]);
+        for (int i = 0; i <= GameHeader.NumWords; i++)
+            fprintf(stderr, "Noun %d: %s\n", i, Nouns[i]);
+    }
 
 #pragma mark autoget
 
@@ -836,8 +743,6 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
 
     read_implicit(dh);
     read_explicit(dh);
-
-//    print_actions();
 
     return TI994A;
 }

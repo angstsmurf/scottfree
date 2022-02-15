@@ -1637,8 +1637,7 @@ static int PerformLine(int ct)
 #ifdef DEBUG_ACTIONS
 				fprintf(stderr,"Draw Hulk image, parameter %d\n",param[pptr]);
 #endif
-				if (CurrentGame != HULK && CurrentGame != HULK_C64  )
-					fprintf(stderr,"Draw Hulk image in non-Hulk game!\n");
+                pptr++;
 				break;
             case 93:
 #ifdef DEBUG_ACTIONS
@@ -1654,9 +1653,6 @@ static int PerformLine(int ct)
 		}
 		cc++;
 	}
-
-//	if (just_restored)
-//		return 0;
 
 	return(1+continuation);
 }
@@ -1698,9 +1694,6 @@ static int PerformActions(int vb,int no)
 		nl=Rooms[MyLoc].Exits[no-1];
 		if(nl!=0)
 		{
-			/* Seas of Blood needs this to be able to flee back to the last room */
-			if (CurrentGame == SEAS_OF_BLOOD || CurrentGame == SEAS_OF_BLOOD_C64)
-				SavedRoom = MyLoc;
 			if(Options & SPECTRUM_STYLE)
 				Output(sys[OK]);
 			MyLoc=nl;
@@ -1893,37 +1886,38 @@ int glkunix_startup_code(glkunix_startup_t *data)
 	if(argc < 1)
 		return 0;
 
-	while(argv[1])
-	{
-		if(*argv[1]!='-')
-			break;
-		switch(argv[1][1])
-		{
-			case 'y':
-				Options|=YOUARE;
-				break;
-			case 'i':
-				Options&=~YOUARE;
-				break;
-			case 'd':
-				Options|=DEBUGGING;
-				break;
-			case 's':
-				Options|=SCOTTLIGHT;
-				break;
-			case 't':
-				Options|=TRS80_STYLE;
-				break;
-			case 'p':
-				Options|=PREHISTORIC_LAMP;
-				break;
-			case 'w':
-				split_screen = 0;
-				break;
-		}
-		argv++;
-		argc--;
-	}
+    if (argc > 1)
+        while(argv[1])
+        {
+            if(*argv[1]!='-')
+                break;
+            switch(argv[1][1])
+            {
+                case 'y':
+                    Options|=YOUARE;
+                    break;
+                case 'i':
+                    Options&=~YOUARE;
+                    break;
+                case 'd':
+                    Options|=DEBUGGING;
+                    break;
+                case 's':
+                    Options|=SCOTTLIGHT;
+                    break;
+                case 't':
+                    Options|=TRS80_STYLE;
+                    break;
+                case 'p':
+                    Options|=PREHISTORIC_LAMP;
+                    break;
+                case 'w':
+                    split_screen = 0;
+                    break;
+            }
+            argv++;
+            argc--;
+        }
 
 #ifdef GARGLK
 	garglk_set_program_name("ScottFree 1.14");
@@ -1992,10 +1986,6 @@ void glk_main(void)
 		split_screen = 1;
 	}
 
-	/* For the Adventure Sheet */
-	if (game_type == SEAS_OF_BLOOD || game_type == SEAS_OF_BLOOD_C64)
-		glk_stylehint_set(wintype_TextBuffer, style_Preformatted, stylehint_Justification, stylehint_just_Centered);
-
 	glk_window_close(Bottom, NULL);
 	Bottom = glk_window_open(0, 0, 0, wintype_TextBuffer, GLK_BUFFER_ROCK);
 
@@ -2026,14 +2016,6 @@ Distributed under the GNU software license\n\n");
 		initial_state = SaveCurrentState();
 		SaveUndo();
 	}
-
-//	for (int i = 0; i < GameInfo->number_of_pictures; i++)
-//	{
-//		DrawImage(i);
-//		fprintf(stderr, "Image %d\n", i);
-//		HitEnter();
-//	}
-
 
 	while(1) {
 		glk_tick();

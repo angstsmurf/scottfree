@@ -15,7 +15,6 @@
 		C37CE90A27BA697A003A6649 /* layouttext.c in Sources */ = {isa = PBXBuildFile; fileRef = C37CE8FB27BA697A003A6649 /* layouttext.c */; };
 		C37CE90C27BA697A003A6649 /* load_TI99_4a.c in Sources */ = {isa = PBXBuildFile; fileRef = C37CE90227BA697A003A6649 /* load_TI99_4a.c */; };
 		C37CE90D27BA697A003A6649 /* restorestate.c in Sources */ = {isa = PBXBuildFile; fileRef = C37CE90327BA697A003A6649 /* restorestate.c */; };
-		C37CE99627BA7152003A6649 /* decompresstext.c in Sources */ = {isa = PBXBuildFile; fileRef = C37CE99527BA7152003A6649 /* decompresstext.c */; };
 		C37CE9B827BA7848003A6649 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = C37CE95427BA6B6A003A6649 /* main.c */; };
 		C37CE9BC27BA797D003A6649 /* libglkmain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C37CE9B427BA783E003A6649 /* libglkmain.a */; };
 		C37CE9C527BA79E3003A6649 /* gi_blorb.c in Sources */ = {isa = PBXBuildFile; fileRef = C37CE94127BA6B6A003A6649 /* gi_blorb.c */; };
@@ -135,8 +134,6 @@
 		C37CE96727BA6B6A003A6649 /* gtstream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = gtstream.c; sourceTree = "<group>"; };
 		C37CE96827BA6B6A003A6649 /* Make.glkterm */ = {isa = PBXFileReference; lastKnownFileType = text; path = Make.glkterm; sourceTree = "<group>"; };
 		C37CE99227BA705D003A6649 /* libncurses.5.4.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libncurses.5.4.tbd; path = usr/lib/libncurses.5.4.tbd; sourceTree = SDKROOT; };
-		C37CE99427BA7149003A6649 /* decompresstext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = decompresstext.h; sourceTree = "<group>"; };
-		C37CE99527BA7152003A6649 /* decompresstext.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = decompresstext.c; sourceTree = "<group>"; };
 		C37CE9B427BA783E003A6649 /* libglkmain.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libglkmain.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		C37CE9C127BA79B8003A6649 /* libglkterm.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libglkterm.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -194,8 +191,6 @@
 			children = (
 				C37CE8F527BA697A003A6649 /* bsd.h */,
 				C37CE8FA27BA697A003A6649 /* bsd.c */,
-				C37CE99427BA7149003A6649 /* decompresstext.h */,
-				C37CE99527BA7152003A6649 /* decompresstext.c */,
 				C37CE8FC27BA697A003A6649 /* Definition.txt */,
 				C37CE8FF27BA697A003A6649 /* definitions.h */,
 				C37CE8F427BA6979003A6649 /* detectgame.h */,
@@ -407,7 +402,6 @@
 				C37CE90527BA697A003A6649 /* scott.c in Sources */,
 				C37CE90A27BA697A003A6649 /* layouttext.c in Sources */,
 				C37CE90927BA697A003A6649 /* bsd.c in Sources */,
-				C37CE99627BA7152003A6649 /* decompresstext.c in Sources */,
 				C37CE90827BA697A003A6649 /* parser.c in Sources */,
 				C37CE90627BA697A003A6649 /* gameinfo.c in Sources */,
 			);

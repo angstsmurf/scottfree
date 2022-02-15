@@ -87,54 +87,6 @@ glui32 *ToUnicode(char *string) {
         char c = string[i];
         if (c == '\n') c = 10;
         glui32 unichar = (glui32)c;
-        if (GameInfo && (CurrentGame == GREMLINS_GERMAN || CurrentGame == GREMLINS_GERMAN_C64)) {
-            const char d = string[i + 1];
-            if (c == 'u' && d == 'e') { // ü
-                if (!(i > 2 && string[i - 1] == 'e')) {
-                    unichar = 0xfc;
-                    i++;
-                }
-            } else if (c == 'o' && d == 'e') {
-                unichar = 0xf6; // ö
-                i++;
-            } else if (c == 'a' && d == 'e') {
-                unichar = 0xe4; // ä
-                i++;
-            } else if (c == 's' && d == 's') {
-                if (string[i + 2] != 'c'
-                    && string[i - 2] != 'W'
-                    && !(string[i - 1] == 'a' && string[i - 2] == 'l')
-                    && string[i + 2] != '-'
-                    && string[i - 2] != 'b') {
-                    unichar = 0xdf; // ß
-                    i++;
-                }
-            } else if (c == 'U' && d == 'E') {
-                unichar = 0xdc; // Ü
-                i++;
-            }
-            if (c == '\"') {
-                unichar = 0x2019; // ’
-            }
-        } else if (GameInfo && CurrentGame == GREMLINS_SPANISH) {
-            switch (c) {
-                case '\x83': unichar = 0xbf; // ¿
-                    break;
-                case '\x80': unichar = 0xa1; // ¡
-                    break;
-                case '\x82': unichar = 0xfc; // ü
-                    break;
-                case '{': unichar = 0xe1; // á
-                    break;
-                case '}': unichar = 0xed; // í
-                    break;
-                case '|': unichar = 0xf3; // ó
-                    break;
-                case '~': unichar = 0xf1; // ñ
-                    break;
-                case '\x84': unichar = 0xe9; // é
-            }
-        }
         unicode[dest++] = unichar;
     }
     unicode[dest] = 0;
@@ -168,10 +120,6 @@ char *FromUnicode(glui32 *unicode_string, int origlength) {
                 break;
             case 0xfc:  // ü
                 dest[destpos] = 'u';
-                if (CurrentGame == GREMLINS_GERMAN || CurrentGame == GREMLINS_GERMAN_C64) {
-                    destpos++;
-                    dest[destpos] = 'e';
-                }
                 break;
             case 0xdf: // ß
                 dest[destpos++] = 's';
@@ -616,16 +564,11 @@ struct Command *CommandFromStrings(int index, struct Command *previous) {
         if (previous) {
                 lastverb = previous->verb;
         }
-        /* Unless the game is German, where we allow the noun to come before the verb */
-        if (CurrentGame != GREMLINS_GERMAN && CurrentGame != GREMLINS_GERMAN_C64) {
-            if (FindExtaneousWords(&i, verb) != 0)
-                return NULL;
-            if (previous)
-                verbindex = previous->verbwordindex;
-            return CreateCommandStruct(lastverb, verb, verbindex, i, previous);
-        } else {
-            found_noun_at_verb_position = 1;
-        }
+        if (FindExtaneousWords(&i, verb) != 0)
+            return NULL;
+        if (previous)
+            verbindex = previous->verbwordindex;
+        return CreateCommandStruct(lastverb, verb, verbindex, i, previous);
     }
 
     if (list == NULL) {
@@ -755,28 +698,6 @@ int GetInput(int *vb, int *no) {
     if (CurrentCommand == NULL) {
         PrintPendingError();
         return 1;
-    }
-
-    /* Hack to make ALLE FALLEN LASSEN work in German Gremlins    */
-    /* The normal verb <-> noun switching mechanism gets confused */
-    /* by the fact that the game lists FALLEN and LASSEN as both  */
-    /* verbs and nouns. */
-
-    if ((CurrentGame == GREMLINS_GERMAN || CurrentGame == GREMLINS_GERMAN_C64) &&
-        CurrentCommand->verb - GameHeader.NumWords == ALL &&
-        CurrentCommand->noun == 123) {
-        CurrentCommand->verb = DROP;
-        CurrentCommand->noun = ALL + GameHeader.NumWords;
-    }
-
-    /* Hack to make RESTORE and RESTART work in Robin of Sherwood */
-    /* instead of being understood as REST, a synonym of WAIT.     */
-    if (GameInfo->type == SHERWOOD_VARIANT && CurrentCommand->verb == 56) {
-        char *verbword = CharWords[CurrentCommand->verbwordindex];
-        if (xstrncasecmp(verbword, "restore", 7) == 0)
-            CurrentCommand->verb = GameHeader.NumWords + RESTORE;
-        else if (xstrncasecmp(verbword, "restart", 7) == 0)
-            CurrentCommand->verb = GameHeader.NumWords + RESTART;
     }
 
     /* We use NumWords + verb for our extra commands */
