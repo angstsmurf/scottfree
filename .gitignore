@@ -1,3 +1,7 @@
 *.o
 *.a
 Make.*
+scottfree/scottfree
+scottfree.xcodeproj/xcuserdata/administrator.xcuserdatad/xcschemes/xcschememanagement.plist
+scott
+scottfree.xcodeproj/xcshareddata/*
