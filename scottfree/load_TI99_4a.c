@@ -515,7 +515,7 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
                     break;
                 }
                 fprintf(stderr, "(%x) Print message %d: \"%s\"\n", value, value, Messages[value]);
-                if (value < 51) {
+                if (value < 52) {
                     commands[numcommands++] = value;
                 } else {
                     commands[numcommands++] = 50 + value;
