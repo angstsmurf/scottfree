@@ -1168,17 +1168,17 @@ static int PerformLine(int ct)
 				param[pptr++]=dv;
 				break;
 			case 1:
-#ifdef DEBUG_ACTIONS
-				fprintf(stderr, "Does the player carry %s?\n", Items[dv].Text);
-#endif
                 if (dv > GameHeader.NumItems) {
-                    if (ti99continuation) {
+                    if (dv == ti99continuation) {
                         ti99continuation = 0;
                         break;
                     } else {
                         return(0);
                     }
                 }
+#ifdef DEBUG_ACTIONS
+                fprintf(stderr, "Does the player carry %s?\n", Items[dv].Text);
+#endif
 				if(Items[dv].Location!=CARRIED)
 					return(0);
 				break;
@@ -1601,7 +1601,6 @@ static int PerformLine(int ct)
 			case 86:
 				if(!(Options & SPECTRUM_STYLE))
 					Output("\n");
-//				else Output(" ");
 				break;
 			case 87:
 			{
@@ -1624,7 +1623,9 @@ static int PerformLine(int ct)
 				Delay(1);
 				break;
 			case 89: {
+#ifdef DEBUG_ACTIONS
 				fprintf(stderr,"Action 89, parameter %d\n",param[pptr]);
+#endif
 				pptr++;
 				switch(CurrentGame) {
 					default:
@@ -1640,10 +1641,10 @@ static int PerformLine(int ct)
                 pptr++;
 				break;
             case 93:
+                ti99continuation = GameHeader.NumItems + ct + 1;
 #ifdef DEBUG_ACTIONS
-                fprintf(stderr,"TI99 continuation\n");
+                fprintf(stderr,"TI99 continuation set to %d\n", ti99continuation);
 #endif
-                ti99continuation = 1;
                 continuation = 1;
                 break;
 			default:

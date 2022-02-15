@@ -408,7 +408,7 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
     if (extra_condition) {
         numconditions = numparameters = 1;
         conditions[0] = 1;
-        parameters[0] = GameHeader.NumItems + 2;
+        parameters[0] = GameHeader.NumItems + GameHeader.NumActions + 1;
         extra_condition = 0;
     }
 
@@ -466,7 +466,7 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
             }
             conditions[numconditions++] = entry.tsr80equiv;
         }
-        if ((!entry.count || !is0xda) && value <= 0xc9)
+        if (!(entry.count && !is0xda) && value <= 0xc9)
              parameters[numparameters++] = 0;
 
         for (int j = 0; j < entry.count; j++) {
