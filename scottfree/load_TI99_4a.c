@@ -523,7 +523,7 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
             break;
         }
         if (value > 0xc9) {
-            if (numcommands == 3 && ptr[i + entry.count] != 0xff && i + entry.count < size + 1) {
+            if (numcommands == 3 && ptr[i + entry.count + 1] != 0xff && i + entry.count < size) {
                 try_at = i;
                 commands[numcommands++] = 73;
                 fprintf(stderr, "Creating a FAKE continue action!\n");
