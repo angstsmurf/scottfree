@@ -559,6 +559,8 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
 //        uint8_t value2 = ptr[i + 1];
 
         i += entry.count;
+        if (value == 0xf2)
+            i--;
         if (value == 0xda) { // try
             try_at = i + 1;
             break;
