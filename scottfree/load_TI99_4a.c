@@ -388,12 +388,12 @@ struct Keyword actions[] =
     {"try",            0xDA, 1, 73 },
 
     {"--0xF1--",       0xF1, 0 },
-    {"add",            0xF2, 0, 82 }, // add 1
+    {"add",            0xF2, 1, 82 }, // add 1
     {"sub",            0xF3, 0, 77 },
 
 
     {".timer",         0xF4, 0, 78 },
-    {"timer",          0xF5, 1 },
+    {"timer",          0xF5, 1, 79 },
 
     {"add",            0xF6, 1, 82 },
     {"sub",            0xF7, 1, 83 },
@@ -541,8 +541,13 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
              parameters[numparameters++] = 0;
 
         for (int j = 0; j < entry.count; j++) {
-            fprintf(stderr, "%x (%d)", ptr[1+i+j],  ptr[1+i+j]);
-            parameters[numparameters++] = ptr[1+i+j];
+            if (value == 0xf2) {
+                fprintf(stderr, "0x01 (1)");
+                parameters[numparameters++] = 1;
+            } else {
+                fprintf(stderr, "0x%x (%d)", ptr[1+i+j],  ptr[1+i+j]);
+                parameters[numparameters++] = ptr[1+i+j];
+            }
         }
         if (entry.swapargs) {
             int temp = parameters[numparameters - 1];
