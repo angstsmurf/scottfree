@@ -1143,6 +1143,8 @@ void LookWithPause(void) {
 
 //#define DEBUG_ACTIONS
 
+int ti99continuation = 0;
+
 static int PerformLine(int ct)
 {
 #ifdef DEBUG_ACTIONS
@@ -1169,8 +1171,14 @@ static int PerformLine(int ct)
 #ifdef DEBUG_ACTIONS
 				fprintf(stderr, "Does the player carry %s?\n", Items[dv].Text);
 #endif
-				if (dv > GameHeader.NumItems)
-					break;
+                if (dv > GameHeader.NumItems) {
+                    if (ti99continuation) {
+                        ti99continuation = 0;
+                        break;
+                    } else {
+                        return(0);
+                    }
+                }
 				if(Items[dv].Location!=CARRIED)
 					return(0);
 				break;
@@ -1632,6 +1640,13 @@ static int PerformLine(int ct)
 				if (CurrentGame != HULK && CurrentGame != HULK_C64  )
 					fprintf(stderr,"Draw Hulk image in non-Hulk game!\n");
 				break;
+            case 93:
+#ifdef DEBUG_ACTIONS
+                fprintf(stderr,"TI99 continuation\n");
+#endif
+                ti99continuation = 1;
+                continuation = 1;
+                break;
 			default:
 				fprintf(stderr,"Unknown action %d [Param begins %d %d]\n",
 						act[cc],param[pptr],param[pptr+1]);

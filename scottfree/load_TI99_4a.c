@@ -474,8 +474,8 @@ void CreateTRS80Action(int verb, int noun, uint16_t *conditions, int numconditio
 }
 
 
-void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
-    fprintf(stderr, "\nAction with verb: %d (%s)\n", verb, Verbs[verb]);
+void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_condition) {
+    fprintf(stderr, "\nTI99 action with verb: %d (%s) ", verb, Verbs[verb]);
     fprintf(stderr, "%s: %d", verb == 0 ? "chance" : "noun", noun);
     if (GameHeader.NumWords >= noun && verb != 0)
         fprintf(stderr, "(%s)", Nouns[noun]);
@@ -489,6 +489,12 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
     int numparameters = 0;
     int try_at = 0;
 
+    if (extra_condition) {
+        numconditions = numparameters = 1;
+        conditions[0] = 1;
+        parameters[0] = GameHeader.NumItems + 2;
+        extra_condition = 0;
+    }
 
     for (int i = 0; i < size; i++) {
         uint8_t value = ptr[i];
@@ -499,7 +505,8 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
             if (value < 0xDB) {
                 if (numcommands == 3 && ptr[i + 1] != 0xff && i < size - 1) {
                     try_at = i;
-                    commands[numcommands++] = 73;
+                    commands[numcommands++] = 93;
+                    extra_condition = 1;
                     fprintf(stderr, "Creating a FAKE continue action!\n");
                     break;
                 }
@@ -516,16 +523,21 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
         }
         struct Keyword entry = actions[index];
         fprintf(stderr, "%s at %X: %s (%x).", value > 0xc9 ? "action" : "condition",  i, entry.name, value);
-        if (numparameters + entry.count > 5) {
+        int is0xf2 = (value == 0xf2);
+        int is0xda = (value == 0xda);
+
+        if (numparameters + entry.count - is0xda > 5) {
             try_at = i;
-            commands[numcommands++] = 73;
+            commands[numcommands++] = 93;
+            extra_condition = 1;
             fprintf(stderr, "Creating a FAKE continue action!\n");
             break;
         }
         if (value > 0xc9) {
-            if (numcommands == 3 && ptr[i + entry.count + 1] != 0xff && i + entry.count < size) {
+            if (numcommands == 3 && value != 0xda && ptr[i + entry.count + 1 - is0xf2] != 0xff && i + entry.count - is0xf2 < size) {
                 try_at = i;
-                commands[numcommands++] = 73;
+                commands[numcommands++] = 93;
+                extra_condition = 1;
                 fprintf(stderr, "Creating a FAKE continue action!\n");
                 break;
             }
@@ -534,20 +546,23 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
         } else {
             if (numconditions == 5) {
                 try_at = i;
-                commands[numcommands++] = 73;
+                commands[numcommands++] = 93;
+                extra_condition = 1;
                 fprintf(stderr, "Creating a FAKE continue action!\n");
                 break;
             }
             conditions[numconditions++] = entry.tsr80equiv;
             fprintf(stderr, "Set conditions[%d] = %d\n", numconditions - 1, conditions[numconditions - 1]);
         }
-        if (entry.count) {
+        if (entry.count && !is0xda) {
             fprintf(stderr, " %d parameter%s: ", entry.count, entry.count > 1 ? "s" : "");
         } else if (value <= 0xc9)
              parameters[numparameters++] = 0;
 
         for (int j = 0; j < entry.count; j++) {
-            if (value == 0xf2) {
+            if (is0xda) {
+                continue;
+            } else if (is0xf2) {
                 fprintf(stderr, "0x01 (1)");
                 parameters[numparameters++] = 1;
             } else {
@@ -562,11 +577,8 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
         }
         fprintf(stderr, "\n");
 
-//        uint8_t value2 = ptr[i + 1];
+        i += (entry.count - is0xf2);
 
-        i += entry.count;
-        if (value == 0xf2)
-            i--;
         if (value == 0xda) { // try
             try_at = i + 1;
             break;
@@ -576,7 +588,7 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size) {
     CreateTRS80Action(verb, noun, conditions, numconditions, commands, numcommands, parameters, numparameters);
 
     if (try_at) {
-        ReadTI99Action(0,0, ptr + try_at, size - try_at);
+        ReadTI99Action(0,0, ptr + try_at, size - try_at, extra_condition);
     }
     fprintf(stderr, "\n\n");
 }
@@ -603,7 +615,7 @@ void read_implicit(struct DATAHEADER dh)
         int size = ptr[1];
         fprintf(stderr, "size: %d\n", size);
 
-        ReadTI99Action(0, noun, ptr + 2, size - 2);
+        ReadTI99Action(0, noun, ptr + 2, size - 2, 0);
         fprintf(stderr, "Created action %d\n", GameHeader.NumActions);
 //        print_action(GameHeader.NumActions);
 
@@ -639,7 +651,7 @@ void read_explicit(struct DATAHEADER dh)
 
                 int noun = p[0];
                 int size = p[1];
-                ReadTI99Action(i, noun, p + 2, size - 2);
+                ReadTI99Action(i, noun, p + 2, size - 2, 0);
 
                 /* go to next block. */
                 p += 1 + p[1];
