@@ -423,13 +423,13 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_cond
         if (index == -1) {
             if (value < 0xdb) {
                 if (numcommands == 3 && ptr[i + 1] != 0xff && i < size - 1) {
+                    /* Split up the action */
                     try_at = i;
                     commands[numcommands++] = 93;
                     glue_condition = 1;
-                    fprintf(stderr, "Creating a FAKE continue action!\n");
                     break;
                 }
-//              Print message (value)
+                /* Print message (value) */
                 if (value < 52) {
                     commands[numcommands++] = value;
                 } else {
@@ -447,18 +447,18 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_cond
         }
 
         if (numparameters + entry.count > 5) {
+            /* Split up the action */
             try_at = i;
             commands[numcommands++] = 93;
             glue_condition = 1;
-            fprintf(stderr, "Creating a FAKE continue action!\n");
             break;
         }
         if (value > 0xc9) {
             if (numcommands == 3 && value != 0xda && ptr[i + entry.count + 1 - is0xf2] != 0xff && i + entry.count - is0xf2 < size) {
+                /* Split up the action */
                 try_at = i;
                 commands[numcommands++] = 93;
                 glue_condition = 1;
-                fprintf(stderr, "Creating a FAKE continue action!\n");
                 break;
             }
             if (value == 0xff) {
@@ -468,10 +468,10 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_cond
             commands[numcommands++] = entry.tsr80equiv;
         } else {
             if (numconditions == 5) {
+                /* Split up the action */
                 try_at = i;
                 commands[numcommands++] = 93;
                 glue_condition = 1;
-                fprintf(stderr, "Creating a FAKE continue action!\n");
                 break;
             }
             conditions[numconditions++] = entry.tsr80equiv;
@@ -495,7 +495,6 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_cond
             parameters[numparameters - 1] = parameters[numparameters - 2];
             parameters[numparameters - 2] = temp;
         }
-        fprintf(stderr, "\n");
 
         i += (entry.count - is0xf2);
 
@@ -602,26 +601,39 @@ void print_actions(void) {
     }
 }
 
-void load_title_screen(void) {
-    char buf[2048];
+uint8_t *LoadTitleScreen(void) {
+    char buf[3074];
     int offset = 0;
-    char *p;
+    uint8_t *p;
     int lines;
 
     /* title screen offset starts at 0x80 */
-    p=(char *)entire_file + 0x80 + file_baseline_offset;
-
+    p = entire_file + 0x80 + file_baseline_offset;
+    if (p - entire_file > file_length)
+        return NULL;
     for(lines=0; lines<24; lines++)
     {
         for (int i = 0; i < 40; i++) {
-            buf[offset++] = *(p++);
+            buf[offset] = *(p++);
+            if (p - entire_file >= file_length)
+                return NULL;
+            if (offset >= 3072)
+                return NULL;
+            if (!isascii(buf[offset]))
+                buf[offset] = '?';
+            offset++;
         }
-        buf[offset++] = '\n';
+        buf[offset] = '\n';
+        if (offset >= 3072) {
+            break;
+        }
+        offset++;
     }
 
     buf[offset] = '\0';
-    title_screen = MemAlloc(offset + 1);
-    memcpy((char *)title_screen, buf, offset + 1);
+    uint8_t *result = MemAlloc(offset + 1);
+    memcpy(result, buf, offset + 1);
+    return result;
 }
 
 int try_loading_ti994a(struct DATAHEADER dh, int loud) {
@@ -794,7 +806,7 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     AutoInventory = 1;
     sys[INVENTORY] = "I'm carrying: ";
 
-    load_title_screen();
+    title_screen = (char *)LoadTitleScreen();
 
     return TI994A;
 }

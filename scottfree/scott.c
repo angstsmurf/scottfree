@@ -233,8 +233,11 @@ void *MemAlloc(int size)
 
 static int RandomPercent(int n)
 {
-	int rv = rand() / (RAND_MAX / 100 + 1);
-	return(rv<n);
+    unsigned int rv=rand()<<6;
+    rv%=100;
+    if(rv<n)
+        return(1);
+    return(0);
 }
 
 static int CountCarried(void)
@@ -1120,7 +1123,7 @@ void HitEnter(void) {
 	do {
 		glk_select(&ev);
 		if (ev.type == evtype_CharInput) {
-			if (ev.val1 == '\n' || ev.val1 == '\372') {
+			if (ev.val1 == keycode_Return) {
 				result = 1;
 			} else {
 				fprintf(stderr, "%c\n", ev.val1);
