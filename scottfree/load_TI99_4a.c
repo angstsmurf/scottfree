@@ -69,11 +69,9 @@ uint16_t get_word(uint8_t *mem)
 {
     uint16_t x;
 #ifdef WE_ARE_BIG_ENDIAN
-    x=*(uint16_t *)mem;
-#else
     x=(*(mem+0)<<8);
     x+=(*(mem+1)&0xFF);
-
+#else
     x=*(uint16_t *)mem;
 #endif
     return fix_word(x);
@@ -174,15 +172,13 @@ char *get_TI994A_string(uint16_t table, int table_offset)
 {
     uint8_t *msgx, *msgy, *nextword;
     char *result;
-    uint16_t msg0, msg1, msg2;
+    uint16_t msg1, msg2;
     uint8_t buffer[1024];
     size_t length, total_length = 0;
 
     uint8_t *game = entire_file;
 
     msgx=game+fix_address(fix_word(table));
-
-    msg0=fix_address(get_word((uint8_t *)msgx));
 
     msgx+=table_offset*2;
     msg1=fix_address(get_word((uint8_t *)msgx));
@@ -490,7 +486,7 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_cond
                 parameters[numparameters++] = ptr[1+i+j];
             }
         }
-        if (entry.swapargs) {
+        if (entry.swapargs && numparameters > 1) {
             int temp = parameters[numparameters - 1];
             parameters[numparameters - 1] = parameters[numparameters - 2];
             parameters[numparameters - 2] = temp;

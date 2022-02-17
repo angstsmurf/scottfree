@@ -687,8 +687,6 @@ static void FlushRoomDescriptionSplitScreen(char *buf)
 {
 	glk_stream_close(room_description_stream, 0);
 
-	int print_delimiter = (Options & (TRS80_STYLE | SPECTRUM_STYLE));
-
 	glk_window_clear(Top);
 	glk_window_get_size(Top, &Width, &TopHeight);
 	int rows, length;
@@ -700,8 +698,6 @@ static void FlushRoomDescriptionSplitScreen(char *buf)
 	if (!(bottomheight < 3 && TopHeight < rows)) {
 		glk_window_get_size(Top, &Width, &TopHeight);
 		glk_window_set_arrangement(o2, winmethod_Above | winmethod_Fixed, rows, Top);
-	} else {
-		print_delimiter = 0;
 	}
 
 	int line = 0;
