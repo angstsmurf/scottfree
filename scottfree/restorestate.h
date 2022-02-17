@@ -9,6 +9,7 @@
 #define restorestate_h
 
 #include <stdio.h>
+#include <stdint.h>
 
 struct SavedState {
     int Counters[16];

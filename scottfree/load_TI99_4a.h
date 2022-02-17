@@ -9,6 +9,7 @@
 #define load_TI99_4a_h
 
 #include <stdio.h>
+#include <stdint.h>
 #include "definitions.h"
 
 

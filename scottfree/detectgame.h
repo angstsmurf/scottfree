@@ -9,6 +9,7 @@
 #define detectgame_h
 
 #include <stdio.h>
+#include <stdint.h>
 #include "definitions.h"
 
 GameIDType detect_game(const char *file_name);

@@ -35,6 +35,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -768,7 +769,7 @@ void Look(void) {
 		return;
 
 	char *buf = MemAlloc(1000);
-	bzero(buf, 1000);
+    buf = memset(buf, 0, 1000);
 	room_description_stream = glk_stream_open_memory(buf, 1000, filemode_Write, 0);
 
 	Room *r;
@@ -2065,11 +2066,16 @@ void glk_main(void)
 		split_screen = 1;
 	}
 
-	glk_window_close(Bottom, NULL);
+    Bottom = FindGlkWindowWithRock(GLK_BUFFER_ROCK);
+    if (Bottom)
+        glk_window_close(Bottom, NULL);
 	Bottom = glk_window_open(0, 0, 0, wintype_TextBuffer, GLK_BUFFER_ROCK);
+    if (Bottom == NULL)
+        glk_exit();
     if (title_screen != NULL) {
         glk_stream_set_current(glk_window_get_stream(Bottom));
         glk_set_style(style_Preformatted);
+        ClearScreen();
         Output(title_screen);
         free(title_screen);
         glk_set_style(style_Normal);
