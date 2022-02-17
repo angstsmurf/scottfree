@@ -71,7 +71,6 @@ const char **Nouns;
 const char **Messages;
 Action *Actions;
 int LightRefill;
-//static char NounText[16];
 int Counters[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };    /* Range unknown */
 int CurrentCounter;
 int SavedRoom;
@@ -234,12 +233,8 @@ void *MemAlloc(int size)
 
 static int RandomPercent(int n)
 {
-	unsigned int rv=rand()<<6;
-	rv %=100;
-//	uint rv = rand() % 100;
-	if(rv<n)
-		return(1);
-	return(0);
+	int rv = rand() / (RAND_MAX / 100 + 1);
+	return(rv<n);
 }
 
 static int CountCarried(void)
@@ -1618,6 +1613,10 @@ static int PerformLine(int ct)
 #endif
 				int t=param[pptr++];
 				int c1=CurrentCounter;
+				if (t > 15) {
+					fprintf(stderr, "ERROR! parameter out of range. Max 15, got %d\n", t);
+					t = 15;
+				}
 				CurrentCounter=Counters[t];
 				Counters[t]=c1;
 #ifdef DEBUG_ACTIONS

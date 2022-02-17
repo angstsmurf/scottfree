@@ -476,8 +476,8 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_cond
             }
             conditions[numconditions++] = entry.tsr80equiv;
         }
-        if (entry.count == 0 && value <= 0xc9)
-             parameters[numparameters++] = 0;
+        if (!entry.count && value <= 0xc9)
+            parameters[numparameters++] = 0;
 
         for (int j = 0; j < entry.count; j++) {
             if (is0xda) {
@@ -521,8 +521,6 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_cond
         }
     }
 }
-
-void print_action(int index);
 
 void read_implicit(struct DATAHEADER dh)
 {
