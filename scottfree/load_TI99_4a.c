@@ -148,7 +148,7 @@ GameIDType DetectTI994A(uint8_t **sf, size_t *extent) {
     assert(file_length >= fix_address(fix_word(dh.p_explicit)));
     assert(file_length >= fix_address(fix_word(dh.p_implicit)));
 
-    return try_loading_ti994a(dh, 1);
+    return try_loading_ti994a(dh, 0);
 }
 
 uint8_t *get_TI994A_word(uint8_t *string, uint8_t **result, size_t *length)
@@ -157,11 +157,15 @@ uint8_t *get_TI994A_word(uint8_t *string, uint8_t **result, size_t *length)
 
     msg=string;
     *length=msg[0];
+    if (*length == 0 || *length > 100) {
+        *length = 0;
+        *result = NULL;
+        return NULL;
+    }
     msg++;
     *result = MemAlloc(*length);
 
-    strncpy((char*)*result, (char*)msg, *length);
-    *(*result + *length) = 0;
+    memcpy(*result, msg, *length);
 
     msg += *length;
 
@@ -187,9 +191,11 @@ char *get_TI994A_string(uint16_t table, int table_offset)
     msgy=game+msg2;
     msgx=game+msg1;
 
-    while(msgx<msgy)
-    {
+    while(msgx<msgy) {
         msgx=get_TI994A_word(msgx, &nextword, &length);
+        if (length == 0 || nextword == NULL) {
+            return NULL;
+        }
         if (length > 100) {
             free(nextword);
             return NULL;
@@ -202,6 +208,8 @@ char *get_TI994A_string(uint16_t table, int table_offset)
         if(msgx<msgy)
             buffer[total_length++] = ' ';
     }
+    if (total_length == 0)
+        return NULL;
     total_length++;
     result = MemAlloc(total_length);
     memcpy(result, buffer, total_length);
@@ -685,6 +693,8 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
 
     do {
         rp->Text = get_TI994A_string(dh.p_room_descr, ct);
+        if (rp->Text == NULL)
+            rp->Text = ".\0";
         if (loud)
             fprintf(stderr, "Room %d: %s\n", ct, rp->Text);
         rp->Image = 255;
@@ -698,6 +708,8 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     while(ct<mn+1)
     {
         Messages[ct] = get_TI994A_string(dh.p_message, ct);
+        if (Messages[ct] == NULL)
+            Messages[ct] = ".\0";
         if (loud)
             fprintf(stderr, "Message %d: %s\n", ct, Messages[ct]);
         ct++;
@@ -708,6 +720,8 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     ip=Items;
     do {
         ip->Text = get_TI994A_string(dh.p_obj_descr, ct);
+        if (ip->Text == NULL)
+            ip->Text = ".\0";
         if (ip->Text && ip->Text[0] == '*')
             tr++;
         if (loud)
