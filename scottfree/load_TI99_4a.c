@@ -418,7 +418,7 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_cond
         int index = getEntryIndex(value);
         if (index == -1) {
             if (value < 0xdb) {
-                if (numcommands == 3 && ptr[i + 1] != 0xff && i < size - 1) {
+                if (numcommands == 3 && i < size - 1) {
                     /* Split up the action */
                     try_at = i;
                     commands[numcommands++] = 93;
@@ -450,7 +450,7 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_cond
             break;
         }
         if (value > 0xc9) {
-            if (numcommands == 3 && value != 0xda && ptr[i + entry.count + 1 - is0xf2] != 0xff && i + entry.count - is0xf2 < size) {
+            if (numcommands == 3 && value != 0xda && i + entry.count - is0xf2 < size) {
                 /* Split up the action */
                 try_at = i;
                 commands[numcommands++] = 93;
