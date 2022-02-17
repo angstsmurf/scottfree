@@ -18,6 +18,7 @@ struct SavedState {
     int CurrentCounter;
     int SavedRoom;
     int LightTime;
+    int AutoInventory;
     uint8_t *ItemLocations;
     struct SavedState *previousState;
     struct SavedState *nextState;

@@ -71,8 +71,8 @@ void CreateErrorMessage(char *fchar, glui32 *second, char *tchar) {
         free(third);
     }
     int length = i + j + k;
-    FirstErrorMessage = MemAlloc((length + 1) * 32);
-    memcpy(FirstErrorMessage, buffer, length * 32);
+    FirstErrorMessage = MemAlloc((length + 1) * 4);
+    memcpy(FirstErrorMessage, buffer, length * 4);
     FirstErrorMessage[length] = 0;
     free(first);
 }
@@ -90,8 +90,8 @@ glui32 *ToUnicode(char *string) {
         unicode[dest++] = unichar;
     }
     unicode[dest] = 0;
-    glui32 *result = MemAlloc((dest + 1) * 32);
-    memcpy(result, unicode, (dest + 1) * 32);
+    glui32 *result = MemAlloc((dest + 1) * 4);
+    memcpy(result, unicode, (dest + 1) * 4);
     return result;
 }
 
@@ -247,8 +247,8 @@ char **SplitIntoWords(glui32 *string, int length) {
     char **words8 = MemAlloc(words_found * sizeof(*words8));
 
     for (int i = 0; i < words_found; i++) {
-        words[i] = (glui32 *)MemAlloc((wordlength[i] + 1) * 32);
-        memcpy(words[i], string + startpos[i], wordlength[i] * 32);
+        words[i] = (glui32 *)MemAlloc((wordlength[i] + 1) * 4);
+        memcpy(words[i], string + startpos[i], wordlength[i] * 4);
         words[i][wordlength[i]] = 0;
         words8[i] = FromUnicode(words[i], wordlength[i]);
     }

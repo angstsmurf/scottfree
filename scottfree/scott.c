@@ -76,10 +76,12 @@ int Counters[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };    /* Range unknown */
 int CurrentCounter;
 int SavedRoom;
 int RoomSaved[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };   /* Range unknown */
+int AutoInventory = 0;
 int Options;        /* Option flags set */
 glui32 Width;        /* Terminal width */
 glui32 TopHeight;        /* Height of top window */
 int file_baseline_offset = 0;
+char *title_screen = NULL;
 
 struct Command *CurrentCommand = NULL;
 
@@ -734,17 +736,43 @@ static void FlushRoomDescriptionSplitScreen(char *buf)
 //	if (print_delimiter) {
 //		PrintWindowDelimiter();
 //	}
-	
+
 	if (pause_next_room_description) {
 		Delay(0.8);
 		pause_next_room_description = 0;
 	}
 }
 
+void ListInventoryInUpperWindow(void) {
+    int i = 0;
+    int anything = 0;
+    WriteToRoomDescriptionStream("\n%s", sys[INVENTORY]);
+    while (i <= GameHeader.NumItems) {
+        if (Items[i].Location==CARRIED) {
+            if (Items[i].Text[0] == 0) {
+                fprintf(stderr, "Invisible item in inventory: %d\n", i);
+                i++;
+                continue;
+            }
+            if (anything == 1 && (Options & (TRS80_STYLE | SPECTRUM_STYLE)) == 0) {
+                WriteToRoomDescriptionStream(sys[ITEM_DELIMITER]);
+            }
+            anything=1;
+            WriteToRoomDescriptionStream(Items[i].Text);
+            if (Options & (TRS80_STYLE | SPECTRUM_STYLE)) {
+                WriteToRoomDescriptionStream(sys[ITEM_DELIMITER]);
+            }
+        }
+        i++;
+    }
+    if (anything == 0)
+        WriteToRoomDescriptionStream(sys[NOTHING]);
+}
+
 void Look(void) {
 	if (split_screen && Top == NULL)
 		return;
-	
+
 	char *buf = MemAlloc(1000);
 	bzero(buf, 1000);
 	room_description_stream = glk_stream_open_memory(buf, 1000, filemode_Write, 0);
@@ -815,6 +843,10 @@ void Look(void) {
 	} else if (f) {
 		WriteToRoomDescriptionStream("\n");
 	}
+
+    if (AutoInventory)
+        ListInventoryInUpperWindow();
+
 	if (split_screen)
 		FlushRoomDescriptionSplitScreen(buf);
 	else
@@ -839,8 +871,8 @@ static void SaveGame(void) {
 		snprintf(buf, sizeof buf, "%d %d\n",Counters[ct],RoomSaved[ct]);
 		glk_put_string_stream(file, buf);
 	}
-	snprintf(buf, sizeof buf, "%ld %d %hd %d %d %hd\n",BitFlags, (BitFlags&(1<<DARKBIT))?1:0,
-			 MyLoc,CurrentCounter,SavedRoom,GameHeader.LightTime);
+    snprintf(buf, sizeof buf, "%ld %d %hd %d %d %hd %d\n",BitFlags, (BitFlags&(1<<DARKBIT))?1:0,
+             MyLoc,CurrentCounter,SavedRoom,GameHeader.LightTime, AutoInventory);
 	glk_put_string_stream(file, buf);
 	for(ct=0;ct<=GameHeader.NumItems;ct++)
 	{
@@ -859,6 +891,8 @@ static void LoadGame(void) {
 	int ct=0;
 	short lo;
 	short DarkFlag;
+
+    int PreviousAutoInventory = AutoInventory;
 
 	ref = glk_fileref_create_by_prompt(fileusage_TextMode | fileusage_SavedGame, filemode_Read, 0);
 	if(ref == NULL) return;
@@ -880,14 +914,16 @@ static void LoadGame(void) {
 		}
 	}
 	glk_get_line_stream(file, buf, sizeof buf);
-	result = sscanf(buf, "%ld %hd %hd %d %d %hd\n",
-		   &BitFlags,&DarkFlag,&MyLoc,&CurrentCounter,&SavedRoom,
-		   &GameHeader.LightTime);
-	if (result != 6 || MyLoc > GameHeader.NumRooms ||
-		MyLoc < 1 || SavedRoom > GameHeader.NumRooms) {
-		RecoverFromBadRestore(state);
-		return;
-	}
+    result = sscanf(buf, "%ld %hd %hd %d %d %hd %d\n",
+                    &BitFlags,&DarkFlag,&MyLoc,&CurrentCounter,&SavedRoom,
+                    &GameHeader.LightTime, &AutoInventory);
+    if (result == 6)
+        AutoInventory = PreviousAutoInventory;
+    if ((result != 7 && result != 6) || MyLoc > GameHeader.NumRooms ||
+        MyLoc < 1 || SavedRoom > GameHeader.NumRooms) {
+        RecoverFromBadRestore(state);
+        return;
+    }
 
 	/* Backward compatibility */
 	if(DarkFlag)
@@ -1131,7 +1167,6 @@ void ListInventory(void) {
 	}
 }
 
-
 void LookWithPause(void) {
 	char fc = Rooms[MyLoc].Text[0];
 	if (Rooms[MyLoc].Text == NULL || MyLoc == 0 ||
@@ -1144,6 +1179,7 @@ void LookWithPause(void) {
 //#define DEBUG_ACTIONS
 
 int ti99continuation = 0;
+int try_chain = 0;
 
 static int PerformLine(int ct)
 {
@@ -1183,6 +1219,13 @@ static int PerformLine(int ct)
 					return(0);
 				break;
 			case 2:
+                if (dv > GameHeader.NumItems) {
+                    if (dv == try_chain) {
+                        break;
+                    } else {
+                        return(0);
+                    }
+                }
 #ifdef DEBUG_ACTIONS
 				fprintf(stderr, "Is %s in location?\n", Items[dv].Text);
 #endif
@@ -1417,6 +1460,9 @@ static int PerformLine(int ct)
 				BitFlags&=~(1<<param[pptr++]);
 				break;
 			case 61:
+#ifdef DEBUG_ACTIONS
+				fprintf(stderr, "Player is dead\n");
+#endif
 				Output(sys[IM_DEAD]);
 				dead = 1;
 				LookWithPause();
@@ -1636,16 +1682,41 @@ static int PerformLine(int ct)
 			}
 			case 90:
 #ifdef DEBUG_ACTIONS
-				fprintf(stderr,"Draw Hulk image, parameter %d\n",param[pptr]);
+                fprintf(stderr,"Draw Hulk image, parameter %d\n",param[pptr]);
 #endif
                 pptr++;
-				break;
+                break;
+            case 91:
+#ifdef DEBUG_ACTIONS
+                fprintf(stderr,"Show automatic inventory\n");
+#endif
+                AutoInventory = 1;
+                break;
+            case 92:
+#ifdef DEBUG_ACTIONS
+                fprintf(stderr,"Hide automatic inventory\n");
+#endif
+                AutoInventory = 0;
+                break;
             case 93:
                 ti99continuation = GameHeader.NumItems + ct + 1;
 #ifdef DEBUG_ACTIONS
                 fprintf(stderr,"TI99 continuation set to %d\n", ti99continuation);
 #endif
                 continuation = 1;
+                break;
+            case 94:
+                try_chain = param[pptr++];
+#ifdef DEBUG_ACTIONS
+                fprintf(stderr,"TI99 try chain set to param[pptr] = %d\n", param[pptr - 1]);
+#endif
+                continuation = 1;
+                break;
+            case 95:
+#ifdef DEBUG_ACTIONS
+                fprintf(stderr,"Broke TI99 try chain %d\n", try_chain);
+#endif
+                try_chain = 0;
                 break;
 			default:
 				fprintf(stderr,"Unknown action %d [Param begins %d %d]\n",
@@ -1951,6 +2022,15 @@ void glk_main(void)
 {
 	int vb,no;
 
+    glk_stylehint_set(wintype_TextBuffer,
+                      style_Preformatted,
+                      stylehint_Justification,
+                      stylehint_just_Centered);
+    glk_stylehint_set(wintype_TextBuffer,
+                      style_User1,
+                      stylehint_Justification,
+                      stylehint_just_Centered);
+
 	Bottom = glk_window_open(0, 0, 0, wintype_TextBuffer, GLK_BUFFER_ROCK);
 	if(Bottom == NULL)
 		glk_exit();
@@ -1989,6 +2069,15 @@ void glk_main(void)
 
 	glk_window_close(Bottom, NULL);
 	Bottom = glk_window_open(0, 0, 0, wintype_TextBuffer, GLK_BUFFER_ROCK);
+    if (title_screen != NULL) {
+        glk_stream_set_current(glk_window_get_stream(Bottom));
+        glk_set_style(style_Preformatted);
+        Output(title_screen);
+        free(title_screen);
+        glk_set_style(style_Normal);
+        HitEnter();
+        ClearScreen();
+    }
 
 	if (Options & TRS80_STYLE) {
 		Width = 64;
@@ -2000,11 +2089,11 @@ void glk_main(void)
 
 	OpenTopWindow();
 
-	if (game_type == SCOTTFREE)
-		Output("\
-Scott Free, A Scott Adams game driver in C.\n\
-Release 1.14, (c) 1993,1994,1995 Swansea University Computer Society.\n\
-Distributed under the GNU software license\n\n");
+//	if (game_type == SCOTTFREE)
+//		Output("\
+//Scott Free, A Scott Adams game driver in C.\n\
+//Release 1.14, (c) 1993,1994,1995 Swansea University Computer Society.\n\
+//Distributed under the GNU software license\n\n");
 
 #ifdef SPATTERLIGHT
 	if (gli_determinism)

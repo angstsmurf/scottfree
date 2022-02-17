@@ -20,12 +20,11 @@
 #ifndef scott_h
 #define scott_h
   
-#define LIGHT_SOURCE	9		/* Always 9 how odd */
-#define CARRIED		255		/* Carried */
-#define DESTROYED	0		/* Destroyed */
-#define DARKBIT		15
-#define LIGHTOUTBIT	16		/* Light gone out */
-
+#define LIGHT_SOURCE 9   /* Always 9 how odd */
+#define CARRIED		 255		/* Carried */
+#define DESTROYED	 0		/* Destroyed */
+#define DARKBIT		 15
+#define LIGHTOUTBIT	 16		/* Light gone out */
 
 #include <stdio.h>
 #include <stdint.h>
@@ -116,6 +115,7 @@ extern Room *Rooms;
 extern Item *Items;
 extern Action *Actions;
 extern const char **Verbs, **Nouns, **Messages;
+extern char *title_screen;
 extern winid_t Bottom, Top;
 extern char *sys[];
 extern char *system_messages[];
@@ -129,6 +129,6 @@ extern int LightRefill;
 extern int Counters[];
 extern int AnimationFlag;
 extern int SavedRoom;
-
+extern int AutoInventory;
 
 #endif /* scott_h */

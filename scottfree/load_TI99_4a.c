@@ -312,11 +312,11 @@ struct Keyword actions[] =
 
     {"cls",            0xD4, 0, 70 },
     {"pic",            0xD5, 0, 89 },
-    {"inv",            0xD6, 0, 66 },
-    {"!inv",           0xD7, 0, 0 },
+    {"inv",            0xD6, 0, 91 },
+    {"!inv",           0xD7, 0, 92 },
     {"ignore",         0xD8, 0, 0 },
     {"success",        0xD9, 0, 0 },
-    {"try",            0xDA, 1, 73 },
+    {"try",            0xDA, 1, 94 },
 
     {"--0xF1--",       0xF1, 0 },
     {"add",            0xF2, 1, 82 }, // add 1
@@ -394,7 +394,7 @@ void CreateTRS80Action(int verb, int noun, uint16_t *conditions, int numconditio
 }
 
 
-void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_condition) {
+void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int glue_condition, int try_chain) {
     uint16_t conditions[5] = { 0,0,0,0,0 };
     uint16_t commands[4] = { 0,0,0,0 };
     uint16_t parameters[5] = { 0,0,0,0,0 };
@@ -403,25 +403,29 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
     int numcommands = 0;
     int numparameters = 0;
     int try_at = 0;
+    int try_end = 0;
 
-    if (extra_condition) {
+    if (glue_condition) {
         numconditions = numparameters = 1;
         conditions[0] = 1;
         parameters[0] = GameHeader.NumItems + GameHeader.NumActions + 1;
-        extra_condition = 0;
+        glue_condition = 0;
+    } else if (try_chain) {
+        numconditions = numparameters = 1;
+        conditions[0] = 2;
+        parameters[0] = try_chain;
     }
 
-    for (int i = 0; i < size; i++) {
+    int i;
+    for (i = 0; i < size; i++) {
         uint8_t value = ptr[i];
-        if (value == 0xff)
-            break;
         int index = getEntryIndex(value);
         if (index == -1) {
             if (value < 0xdb) {
                 if (numcommands == 3 && ptr[i + 1] != 0xff && i < size - 1) {
                     try_at = i;
                     commands[numcommands++] = 93;
-                    extra_condition = 1;
+                    glue_condition = 1;
                     fprintf(stderr, "Creating a FAKE continue action!\n");
                     break;
                 }
@@ -438,11 +442,14 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
         struct Keyword entry = actions[index];
         int is0xf2 = (value == 0xf2);
         int is0xda = (value == 0xda);
+        if (is0xda) {
+            try_end = i + ptr[i+1] + 1;
+        }
 
-        if (numparameters + entry.count - is0xda > 5) {
+        if (numparameters + entry.count > 5) {
             try_at = i;
             commands[numcommands++] = 93;
-            extra_condition = 1;
+            glue_condition = 1;
             fprintf(stderr, "Creating a FAKE continue action!\n");
             break;
         }
@@ -450,8 +457,12 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
             if (numcommands == 3 && value != 0xda && ptr[i + entry.count + 1 - is0xf2] != 0xff && i + entry.count - is0xf2 < size) {
                 try_at = i;
                 commands[numcommands++] = 93;
-                extra_condition = 1;
+                glue_condition = 1;
                 fprintf(stderr, "Creating a FAKE continue action!\n");
+                break;
+            }
+            if (value == 0xff) {
+                commands[numcommands++] = 95;
                 break;
             }
             commands[numcommands++] = entry.tsr80equiv;
@@ -459,18 +470,20 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
             if (numconditions == 5) {
                 try_at = i;
                 commands[numcommands++] = 93;
-                extra_condition = 1;
+                glue_condition = 1;
                 fprintf(stderr, "Creating a FAKE continue action!\n");
                 break;
             }
             conditions[numconditions++] = entry.tsr80equiv;
         }
-        if (!(entry.count && !is0xda) && value <= 0xc9)
+        if (entry.count == 0 && value <= 0xc9)
              parameters[numparameters++] = 0;
 
         for (int j = 0; j < entry.count; j++) {
             if (is0xda) {
-                continue;
+                if (try_chain == 0)
+                    try_chain = GameHeader.NumActions + 2 + GameHeader.NumItems;
+                parameters[numparameters++] = try_chain;
             } else if (is0xf2) {
                 parameters[numparameters++] = 1;
             } else {
@@ -495,7 +508,17 @@ void ReadTI99Action(int verb, int noun, uint8_t *ptr, size_t size, int extra_con
     CreateTRS80Action(verb, noun, conditions, numconditions, commands, numcommands, parameters, numparameters);
 
     if (try_at) {
-        ReadTI99Action(0,0, ptr + try_at, size - try_at, extra_condition);
+        if (glue_condition)
+            ReadTI99Action(0,0, ptr + try_at, size - try_at, 1, 0);
+        else {
+            if (try_chain == 0)
+                try_chain = GameHeader.NumActions + 2 + GameHeader.NumItems;
+            ReadTI99Action(0,0, ptr + try_at, try_end - try_at, 0, try_chain);
+
+            if (try_end < size - 1) {
+                ReadTI99Action(0,0, ptr + try_end, size - try_end, 0, try_chain);
+            }
+        }
     }
 }
 
@@ -520,8 +543,7 @@ void read_implicit(struct DATAHEADER dh)
         int noun = ptr[0];
         int size = ptr[1];
 
-        ReadTI99Action(0, noun, ptr + 2, size - 2, 0);
-//        fprintf(stderr, "Created action %d\n", GameHeader.NumActions);
+        ReadTI99Action(0, noun, ptr + 2, size - 2, 0, 0);
 
         if(ptr[1] == 0)
             loop_flag = 1;
@@ -555,7 +577,7 @@ void read_explicit(struct DATAHEADER dh)
 
                 int noun = p[0];
                 int size = p[1];
-                ReadTI99Action(i, noun, p + 2, size - 2, 0);
+                ReadTI99Action(i, noun, p + 2, size - 2, 0, 0);
 
                 /* go to next block. */
                 p += 1 + p[1];
@@ -580,6 +602,28 @@ void print_actions(void) {
     for (int ct = 0; ct <= GameHeader.NumActions; ct++) {
         print_action(ct);
     }
+}
+
+void load_title_screen(void) {
+    char buf[2048];
+    int offset = 0;
+    char *p;
+    int lines;
+
+    /* title screen offset starts at 0x80 */
+    p=(char *)entire_file + 0x80 + file_baseline_offset;
+
+    for(lines=0; lines<24; lines++)
+    {
+        for (int i = 0; i < 40; i++) {
+            buf[offset++] = *(p++);
+        }
+        buf[offset++] = '\n';
+    }
+
+    buf[offset] = '\0';
+    title_screen = MemAlloc(offset + 1);
+    memcpy((char *)title_screen, buf, offset + 1);
 }
 
 int try_loading_ti994a(struct DATAHEADER dh, int loud) {
@@ -748,6 +792,11 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     memcpy(a, Actions, sizeof(Action)*(GameHeader.NumActions+1));
     free(Actions);
     Actions = a;
+
+    AutoInventory = 1;
+    sys[INVENTORY] = "I'm carrying: ";
+
+    load_title_screen();
 
     return TI994A;
 }

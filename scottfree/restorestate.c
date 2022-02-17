@@ -37,6 +37,7 @@ struct SavedState *SaveCurrentState(void) {
     s->CurrentCounter = CurrentCounter;
     s->SavedRoom = SavedRoom;
     s->LightTime = GameHeader.LightTime;
+    s->AutoInventory = AutoInventory;
 
     s->ItemLocations = MemAlloc(GameHeader.NumItems + 1);
 
@@ -69,6 +70,7 @@ void RestoreState(struct SavedState *state) {
     CurrentCounter = state->CurrentCounter;
     SavedRoom = state->SavedRoom;
     GameHeader.LightTime = state->LightTime;
+    AutoInventory = state->AutoInventory;
 
     for(int ct=0;ct<=GameHeader.NumItems;ct++) {
         Items[ct].Location = state->ItemLocations[ct];
