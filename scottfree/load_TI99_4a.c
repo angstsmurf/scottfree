@@ -618,20 +618,16 @@ uint8_t *LoadTitleScreen(void) {
     for(lines=0; lines<24; lines++)
     {
         for (int i = 0; i < 40; i++) {
-            buf[offset] = *(p++);
+            char c = *(p++);
             if (p - entire_file >= file_length)
                 return NULL;
+            if (!((c <= 127) && (c >= 0))) /* isascii() */
+                c = '?';
+            buf[offset++] = c;
             if (offset >= 3072)
                 return NULL;
-            if (!isascii(buf[offset]))
-                buf[offset] = '?';
-            offset++;
         }
-        buf[offset] = '\n';
-        if (offset >= 3072) {
-            break;
-        }
-        offset++;
+        buf[offset++] = '\n';
     }
 
     buf[offset] = '\0';
@@ -784,9 +780,6 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud) {
     }
 
 #pragma mark autoget
-
-    if (seek_if_needed(fix_address(fix_word(dh.p_obj_link)), &offset, &ptr) == 0)
-        return 0;
 
     ct=0;
     ip=Items;
