@@ -8,7 +8,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #include "scott.h"
 
@@ -135,7 +134,7 @@ GameIDType detect_game(const char *file_name) {
         ExtraNouns[i] = EnglishExtraNouns[i];
 
     // Check if the original ScottFree LoadDatabase() function can read the file.
-    if (LoadDatabase(f, 1)) {
+    if (LoadDatabase(f, 0)) {
         fclose(f);
         GameInfo = MemAlloc(sizeof(GameInfo));
         GameInfo->gameID = SCOTTFREE;
