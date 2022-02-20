@@ -12,7 +12,6 @@
 #include <stdint.h>
 #include "definitions.h"
 
-
 GameIDType DetectTI994A(uint8_t **sf, size_t *extent);
 
 #endif /* load_TI99_4a_h */

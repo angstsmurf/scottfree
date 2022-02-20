@@ -13,7 +13,7 @@
 #define MAX_UNDOS 100
 
 extern int CurrentCounter;
-extern int RoomSaved[];    /* Range unknown */
+extern int RoomSaved[]; /* Range unknown */
 
 extern int stop_time;
 extern int just_started;
@@ -25,9 +25,10 @@ static struct SavedState *oldest_undo = NULL;
 
 static int number_of_undos;
 
-struct SavedState *SaveCurrentState(void) {
+struct SavedState *SaveCurrentState(void)
+{
     struct SavedState *s = (struct SavedState *)MemAlloc(sizeof(struct SavedState));
-    for(int ct=0;ct<16;ct++) {
+    for (int ct = 0; ct < 16; ct++) {
         s->Counters[ct] = Counters[ct];
         s->RoomSaved[ct] = RoomSaved[ct];
     }
@@ -41,7 +42,7 @@ struct SavedState *SaveCurrentState(void) {
 
     s->ItemLocations = MemAlloc(GameHeader.NumItems + 1);
 
-    for(int ct=0;ct<=GameHeader.NumItems;ct++) {
+    for (int ct = 0; ct <= GameHeader.NumItems; ct++) {
         s->ItemLocations[ct] = Items[ct].Location;
     }
 
@@ -51,15 +52,16 @@ struct SavedState *SaveCurrentState(void) {
     return s;
 }
 
-void RecoverFromBadRestore(struct SavedState *state) {
+void RecoverFromBadRestore(struct SavedState *state)
+{
     Output("BAD DATA! Invalid save file.\n");
     RestoreState(state);
     free(state);
 }
 
-
-void RestoreState(struct SavedState *state) {
-    for(int ct=0;ct<16;ct++) {
+void RestoreState(struct SavedState *state)
+{
+    for (int ct = 0; ct < 16; ct++) {
         Counters[ct] = state->Counters[ct];
         RoomSaved[ct] = state->RoomSaved[ct];
     }
@@ -72,7 +74,7 @@ void RestoreState(struct SavedState *state) {
     GameHeader.LightTime = state->LightTime;
     AutoInventory = state->AutoInventory;
 
-    for(int ct=0;ct<=GameHeader.NumItems;ct++) {
+    for (int ct = 0; ct <= GameHeader.NumItems; ct++) {
         Items[ct].Location = state->ItemLocations[ct];
     }
 
@@ -80,7 +82,8 @@ void RestoreState(struct SavedState *state) {
     dead = 0;
 }
 
-void SaveUndo(void) {
+void SaveUndo(void)
+{
     if (last_undo == NULL) {
         last_undo = SaveCurrentState();
         oldest_undo = last_undo;
@@ -106,7 +109,8 @@ void SaveUndo(void) {
     }
 }
 
-void RestoreUndo(void) {
+void RestoreUndo(void)
+{
     if (just_started) {
         Output("Can't undo on first turn.\n");
         return;
@@ -126,7 +130,8 @@ void RestoreUndo(void) {
     number_of_undos--;
 }
 
-void RamSave(void) {
+void RamSave(void)
+{
     if (ramsave != NULL) {
         free(ramsave->ItemLocations);
         free(ramsave);
@@ -136,7 +141,8 @@ void RamSave(void) {
     Output("State saved.\n");
 }
 
-void RamRestore(void) {
+void RamRestore(void)
+{
     if (ramsave == NULL) {
         Output("No saved state exists.\n");
         return;

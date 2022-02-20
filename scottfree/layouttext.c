@@ -5,13 +5,14 @@
 //  Created by Administrator on 2022-01-11.
 //
 
-#include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "layouttext.h"
 
-int FindBreak(const char *buf, int pos, int columns) {
+int FindBreak(const char *buf, int pos, int columns)
+{
 
     int diff = 0;
 
@@ -19,7 +20,7 @@ int FindBreak(const char *buf, int pos, int columns) {
         pos--;
         diff++;
     }
-    
+
     if (diff >= columns || diff < 1) /* Found no space */ {
         return -1;
     }
@@ -29,8 +30,9 @@ int FindBreak(const char *buf, int pos, int columns) {
 
 /* Breaks a null-terminated string up by inserting newlines, moving words
  down to the next line when reaching the end of the line */
-char *LineBreakText(char *source, int columns, int *rows, int *length) {
-    columns-=1;
+char *LineBreakText(char *source, int columns, int *rows, int *length)
+{
+    columns -= 1;
 
     char *result = NULL;
     char buf[768];

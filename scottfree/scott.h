@@ -20,11 +20,11 @@
 #ifndef scott_h
 #define scott_h
   
-#define LIGHT_SOURCE 9   /* Always 9 how odd */
-#define CARRIED		 255		/* Carried */
-#define DESTROYED	 0		/* Destroyed */
-#define DARKBIT		 15
-#define LIGHTOUTBIT	 16		/* Light gone out */
+#define LIGHT_SOURCE 9         /* Always 9 how odd */
+#define CARRIED      255       /* Carried */
+#define DESTROYED    0         /* Destroyed */
+#define DARKBIT      15
+#define LIGHTOUTBIT  16        /* Light gone out */
 
 #include <stdio.h>
 #include <stdint.h>
@@ -94,7 +94,11 @@ typedef struct {
 
 void Output(const char *a);
 void OutputNumber(int a);
-void Display(winid_t w, const char *fmt, ...);
+void Display(winid_t w, const char *fmt, ...)
+#ifdef __GNUC__
+__attribute__((__format__(__printf__, 2, 3)))
+#endif
+;
 void HitEnter(void);
 void Look(void);
 void ListInventory(void);
@@ -130,5 +134,6 @@ extern int Counters[];
 extern int AnimationFlag;
 extern int SavedRoom;
 extern int AutoInventory;
+extern int WeAreBigEndian;
 
 #endif /* scott_h */

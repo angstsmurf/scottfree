@@ -14,9 +14,8 @@
 #include "detectgame.h"
 #include "gameinfo.h"
 
-#include "parser.h"
 #include "load_TI99_4a.h"
-
+#include "parser.h"
 
 extern const char *sysdict_zx[MAX_SYSMESS];
 extern int header[];
@@ -37,14 +36,14 @@ struct dictionaryKey dictKeys[] = {
     { FIVE_LETTER_UNCOMPRESSED, "*CROSS*RUN\0\0" } // Claymorgue
 };
 
-
 int FindCode(char *x, int base)
 {
     unsigned const char *p = entire_file + base;
     int len = strlen(x);
-    if (len < 7) len = 7;
-    while(p < entire_file + file_length - len) {
-        if(memcmp(p, x, len) == 0) {
+    if (len < 7)
+        len = 7;
+    while (p < entire_file + file_length - len) {
+        if (memcmp(p, x, len) == 0) {
             return p - entire_file;
         }
         p++;
@@ -52,9 +51,10 @@ int FindCode(char *x, int base)
     return -1;
 }
 
-dictionary_type getId(size_t *offset) {
+dictionary_type getId(size_t *offset)
+{
     for (int i = 0; i < 8; i++) {
-        *offset = FindCode(dictKeys[i].signature , 0);
+        *offset = FindCode(dictKeys[i].signature, 0);
         if (*offset != -1) {
             if (i == 4 || i == 5) // GERMAN
                 *offset -= 5;
@@ -69,8 +69,9 @@ dictionary_type getId(size_t *offset) {
     return NOT_A_GAME;
 }
 
-void read_header(uint8_t *ptr) {
-    int i,value;
+void read_header(uint8_t *ptr)
+{
+    int i, value;
     for (i = 0; i < 24; i++) {
         value = *ptr + 256 * *(ptr + 1);
         header[i] = value;
@@ -78,13 +79,15 @@ void read_header(uint8_t *ptr) {
     }
 }
 
-uint8_t *seek_to_pos(uint8_t *buf, int offset) {
+uint8_t *seek_to_pos(uint8_t *buf, int offset)
+{
     if (offset > file_length)
         return 0;
     return buf + offset;
 }
 
-int seek_if_needed(int expected_start, int *offset, uint8_t **ptr) {
+int seek_if_needed(int expected_start, int *offset, uint8_t **ptr)
+{
     if (expected_start != FOLLOWS) {
         *offset = expected_start + file_baseline_offset;
         uint8_t *ptrbefore = *ptr;
@@ -97,32 +100,34 @@ int seek_if_needed(int expected_start, int *offset, uint8_t **ptr) {
     return 1;
 }
 
-void print_header_info(int *h, int ni, int na, int nw, int nr, int mc, int pr, int tr, int wl, int lt, int mn, int trm) {
+void print_header_info(int *h, int ni, int na, int nw, int nr, int mc, int pr, int tr, int wl, int lt, int mn, int trm)
+{
     uint16_t value;
     for (int i = 0; i < 13; i++) {
-        value=h[i];
+        value = h[i];
         fprintf(stderr, "b $%X %d: ", 0x494d + 0x3FE5 + i * 2, i);
-        fprintf(stderr, "\t%d\n",value);
+        fprintf(stderr, "\t%d\n", value);
     }
 
     fprintf(stderr, "Number of items =\t%d\n", ni);
     fprintf(stderr, "Number of actions =\t%d\n", na);
-    fprintf(stderr, "Number of words =\t%d\n",nw);
-    fprintf(stderr, "Number of rooms =\t%d\n",nr);
-    fprintf(stderr, "Max carried items =\t%d\n",mc);
-    fprintf(stderr, "Word length =\t%d\n",wl);
-    fprintf(stderr, "Number of messages =\t%d\n",mn);
+    fprintf(stderr, "Number of words =\t%d\n", nw);
+    fprintf(stderr, "Number of rooms =\t%d\n", nr);
+    fprintf(stderr, "Max carried items =\t%d\n", mc);
+    fprintf(stderr, "Word length =\t%d\n", wl);
+    fprintf(stderr, "Number of messages =\t%d\n", mn);
     fprintf(stderr, "Player start location: %d\n", pr);
     fprintf(stderr, "Treasure room: %d\n", tr);
     fprintf(stderr, "Lightsource time left: %d\n", lt);
     fprintf(stderr, "Number of treasures: %d\n", tr);
 }
 
-GameIDType detect_game(const char *file_name) {
+GameIDType detect_game(const char *file_name)
+{
 
-     FILE *f = fopen(file_name, "r");
-        if(f==NULL)
-            Fatal("Cannot open game");
+    FILE *f = fopen(file_name, "r");
+    if (f == NULL)
+        Fatal("Cannot open game");
 
     for (int i = 0; i < NUMBER_OF_DIRECTIONS; i++)
         Directions[i] = EnglishDirections[i];
@@ -136,14 +141,14 @@ GameIDType detect_game(const char *file_name) {
     // Check if the original ScottFree LoadDatabase() function can read the file.
     if (LoadDatabase(f, 0)) {
         fclose(f);
-        GameInfo = MemAlloc(sizeof(GameInfo));
+        GameInfo = MemAlloc(sizeof(*GameInfo));
         GameInfo->gameID = SCOTTFREE;
         return SCOTTFREE;
     }
 
     file_length = GetFileLength(f);
 
-    if (file_length > MAX_GAMEFILE_SIZE)  {
+    if (file_length > MAX_GAMEFILE_SIZE) {
         fprintf(stderr, "File too large to be a vaild game file (%zu, max is %d)\n", file_length, MAX_GAMEFILE_SIZE);
         return 0;
     }
@@ -157,13 +162,12 @@ GameIDType detect_game(const char *file_name) {
 
     GameIDType TI994A_id = UNKNOWN_GAME;
 
-        TI994A_id = DetectTI994A(&entire_file, &file_length);
-        if (TI994A_id) {
-            GameInfo = MemAlloc(sizeof(GameInfo));
-            GameInfo->gameID = SCOTTFREE;
-            return SCOTTFREE;
-        }
-
+    TI994A_id = DetectTI994A(&entire_file, &file_length);
+    if (TI994A_id) {
+        GameInfo = MemAlloc(sizeof(*GameInfo));
+        GameInfo->gameID = SCOTTFREE;
+        return SCOTTFREE;
+    }
 
     if (!TI994A_id) {
         size_t offset;
