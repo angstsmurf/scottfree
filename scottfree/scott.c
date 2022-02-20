@@ -2007,12 +2007,12 @@ void glk_main(void)
         sys[i] = sysdict[i];
     }
 
-    char **dictpointer;
+    const char **dictpointer;
 
     if (Options & YOUARE)
-        dictpointer = (char **)sysdict;
+        dictpointer = sysdict;
     else
-        dictpointer = (char **)sysdict_i_am;
+        dictpointer = sysdict_i_am;
 
     for (int i = 0; i < MAX_SYSMESS && dictpointer[i] != NULL; i++) {
         sys[i] = dictpointer[i];
