@@ -22,7 +22,7 @@ extern int header[];
 
 struct dictionaryKey {
     dictionary_type dict;
-    char *signature;
+    const char *signature;
 };
 
 struct dictionaryKey dictKeys[] = {
@@ -31,7 +31,7 @@ struct dictionaryKey dictKeys[] = {
     { FIVE_LETTER_UNCOMPRESSED, "AUTO\0\0GO" },
     { FOUR_LETTER_COMPRESSED, "aUTOgO\0" },
     { GERMAN, "\xc7" "EHENSTEIGE" },
-    { FIVE_LETTER_COMPRESSED, "gEHENSTEIGE"}, // Gremlins C64
+    { FIVE_LETTER_COMPRESSED, "gEHENSTEIGE" }, // Gremlins C64
     { SPANISH, "ANDAENTRAVAN" },
     { FIVE_LETTER_UNCOMPRESSED, "*CROSS*RUN\0\0" } // Claymorgue
 };
