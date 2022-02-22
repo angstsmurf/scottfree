@@ -48,8 +48,8 @@
 #include "layouttext.h"
 #include "restorestate.h"
 
-#include "parser.h"
 #include "TI99interp.h"
+#include "parser.h"
 
 #include "bsd.h"
 #include "scott.h"
@@ -277,7 +277,8 @@ static int MatchUpItem(int noun, int loc)
         word = Nouns[noun];
 
     while (ct <= GameHeader.NumItems) {
-        if (Items[ct].AutoGet && (loc == 0 || Items[ct].Location == loc) && xstrncasecmp(Items[ct].AutoGet, word, GameHeader.WordLength) == 0)
+        if (Items[ct].AutoGet && (loc == 0 || Items[ct].Location == loc) &&
+            xstrncasecmp(Items[ct].AutoGet, word, GameHeader.WordLength) == 0)
             return (ct);
         ct++;
     }
@@ -534,7 +535,7 @@ int LoadDatabase(FILE *f, int loud)
         }
         ip->Location = (unsigned char)lo;
         if (loud)
-            fprintf(stderr, "Location of item %d: %d, \"%s\"\n",ct, ip->Location, ip->Location == 255 ? "CARRIED" : Rooms[ip->Location].Text);
+            fprintf(stderr, "Location of item %d: %d, \"%s\"\n", ct, ip->Location, ip->Location == 255 ? "CARRIED" : Rooms[ip->Location].Text);
         ip->InitialLoc = ip->Location;
         ip++;
         ct++;
@@ -580,9 +581,9 @@ strid_t room_description_stream = NULL;
 
 void WriteToRoomDescriptionStream(const char *fmt, ...)
 #ifdef __GNUC__
-__attribute__((__format__(__printf__, 1, 2)))
+    __attribute__((__format__(__printf__, 1, 2)))
 #endif
-;
+    ;
 
 void WriteToRoomDescriptionStream(const char *fmt, ...)
 {
@@ -779,8 +780,7 @@ void Look(void)
         glk_put_char_stream_uni(Transcript, 10);
     }
 
-    if ((BitFlags & (1 << DARKBIT)) && Items[LIGHT_SOURCE].Location != CARRIED &&
-        Items[LIGHT_SOURCE].Location != MyLoc) {
+    if ((BitFlags & (1 << DARKBIT)) && Items[LIGHT_SOURCE].Location != CARRIED && Items[LIGHT_SOURCE].Location != MyLoc) {
         WriteToRoomDescriptionStream("%s", sys[TOO_DARK_TO_SEE]);
         if (split_screen)
             FlushRoomDescriptionSplitScreen(buf);
@@ -1179,7 +1179,8 @@ void LookWithPause(void)
     Look();
 }
 
-void DoneIt(void) {
+void DoneIt(void)
+{
     if (split_screen && Top)
         Look();
     dead = 1;
@@ -1197,10 +1198,11 @@ void DoneIt(void) {
     }
 }
 
-void PrintNoun(void) {
+void PrintNoun(void)
+{
     if (CurrentCommand)
         glk_put_string_stream_uni(glk_window_get_stream(Bottom),
-                                  UnicodeWords[CurrentCommand->nounwordindex]);
+            UnicodeWords[CurrentCommand->nounwordindex]);
 }
 
 //#define DEBUG_ACTIONS
@@ -1700,8 +1702,7 @@ void PrintTakenOrDropped(int index)
     if (last == 10 || last == 13)
         return;
     Output(" ");
-    if ((!(Options & TI994A_STYLE) &&
-         (CurrentCommand->allflag & LASTALL) != LASTALL) || split_screen == 0) {
+    if ((!(Options & TI994A_STYLE) && (CurrentCommand->allflag & LASTALL) != LASTALL) || split_screen == 0) {
         Output("\n");
     }
 }
@@ -1758,44 +1759,44 @@ static int PerformActions(int vb, int no)
     flag = -1;
     if (CurrentGame != TI994A) {
         while (ct <= GameHeader.NumActions) {
-        int verbvalue, nounvalue;
-        verbvalue = Actions[ct].Vocab;
-        /* Think this is now right. If a line we run has an action73
+            int verbvalue, nounvalue;
+            verbvalue = Actions[ct].Vocab;
+            /* Think this is now right. If a line we run has an action73
 		 run all following lines with vocab of 0,0 */
-        if (vb != 0 && (doagain && verbvalue != 0))
-            break;
-        /* Oops.. added this minor cockup fix 1.11 */
-        if (vb != 0 && !doagain && flag == 0)
-            break;
-        nounvalue = verbvalue % 150;
-        verbvalue /= 150;
-        if ((verbvalue == vb) || (doagain && Actions[ct].Vocab == 0)) {
-            if ((verbvalue == 0 && RandomPercent(nounvalue)) || doagain || (verbvalue != 0 && (nounvalue == no || nounvalue == 0))) {
-                if (verbvalue == vb && vb != 0 && no != 0 && nounvalue == no)
-                    found_match = 1;
-                int f2;
-                if (flag == -1)
-                    flag = -2;
-                if ((f2 = PerformLine(ct)) > 0) {
-                    /* ahah finally figured it out ! */
-                    flag = 0;
-                    if (f2 == 2)
-                        doagain = 1;
-                    if (vb != 0 && doagain == 0)
-                        return (0);
+            if (vb != 0 && (doagain && verbvalue != 0))
+                break;
+            /* Oops.. added this minor cockup fix 1.11 */
+            if (vb != 0 && !doagain && flag == 0)
+                break;
+            nounvalue = verbvalue % 150;
+            verbvalue /= 150;
+            if ((verbvalue == vb) || (doagain && Actions[ct].Vocab == 0)) {
+                if ((verbvalue == 0 && RandomPercent(nounvalue)) || doagain || (verbvalue != 0 && (nounvalue == no || nounvalue == 0))) {
+                    if (verbvalue == vb && vb != 0 && no != 0 && nounvalue == no)
+                        found_match = 1;
+                    int f2;
+                    if (flag == -1)
+                        flag = -2;
+                    if ((f2 = PerformLine(ct)) > 0) {
+                        /* ahah finally figured it out ! */
+                        flag = 0;
+                        if (f2 == 2)
+                            doagain = 1;
+                        if (vb != 0 && doagain == 0)
+                            return (0);
+                    }
                 }
             }
-        }
 
-        ct++;
+            ct++;
 
-        /* Previously this did not check ct against
-		 * GameHeader.NumActions and would read past the end of
-		 * Actions.  I don't know what should happen on the last
-		 * action, but doing nothing is better than reading one
-		 * past the end.
-		 * --Chris
-		 */
+            /* Previously this did not check ct against
+             * GameHeader.NumActions and would read past the end of
+             * Actions.  I don't know what should happen on the last
+             * action, but doing nothing is better than reading one
+             * past the end.
+             * --Chris
+             */
             if (ct <= GameHeader.NumActions && Actions[ct].Vocab != 0)
                 doagain = 0;
         }
@@ -1977,7 +1978,7 @@ void glk_main(void)
 {
     int vb, no, n = 1;
 
-    if(*(char *)&n != 1) {
+    if (*(char *)&n != 1) {
         WeAreBigEndian = 1;
     }
 
@@ -2050,73 +2051,69 @@ void glk_main(void)
 //Distributed under the GNU software license\n\n");
 
 #ifdef SPATTERLIGHT
-	if (gli_determinism)
-		srand(1234);
-	else
+    if (gli_determinism)
+        srand(1234);
+    else
 #endif
-		srand((unsigned int)time(NULL));
+        srand((unsigned int)time(NULL));
 
-	if (initial_state == NULL) {
-		initial_state = SaveCurrentState();
-		SaveUndo();
-	}
+    if (initial_state == NULL) {
+        initial_state = SaveCurrentState();
+        SaveUndo();
+    }
 
-	while (1) {
-		glk_tick();
+    while (1) {
+        glk_tick();
 
-		if (!stop_time)
-			PerformActions(0, 0);
-		if (!(CurrentCommand && CurrentCommand->allflag &&
-			  (CurrentCommand->allflag & LASTALL) != LASTALL))
-			Look();
+        if (!stop_time)
+            PerformActions(0, 0);
+        if (!(CurrentCommand && CurrentCommand->allflag && (CurrentCommand->allflag & LASTALL) != LASTALL))
+            Look();
 
-		if (!stop_time && !before_first_turn && !dead)
-			SaveUndo();
+        if (!stop_time && !before_first_turn && !dead)
+            SaveUndo();
 
-		before_first_turn = 0;
+        before_first_turn = 0;
 
-		if (GetInput(&vb, &no) == 1)
-			continue;
+        if (GetInput(&vb, &no) == 1)
+            continue;
 
-		switch (PerformActions(vb, no)) {
-			case -1:
-				if (!RecheckForExtraCommand())
-					Output(sys[I_DONT_UNDERSTAND]);
-				break;
-			case -2:
-				Output(sys[YOU_CANT_DO_THAT_YET]);
-				break;
-			default:
-				just_started = 0;
-				stop_time = 0;
-		}
+        switch (PerformActions(vb, no)) {
+        case -1:
+            if (!RecheckForExtraCommand())
+                Output(sys[I_DONT_UNDERSTAND]);
+            break;
+        case -2:
+            Output(sys[YOU_CANT_DO_THAT_YET]);
+            break;
+        default:
+            just_started = 0;
+            stop_time = 0;
+        }
 
-		/* Brian Howarth games seem to use -1 for forever */
-		if (Items[LIGHT_SOURCE].Location /*==-1*/ != DESTROYED &&
-			GameHeader.LightTime != -1) {
-			GameHeader.LightTime--;
-			if (GameHeader.LightTime < 1) {
-				BitFlags |= (1 << LIGHTOUTBIT);
-				if (Items[LIGHT_SOURCE].Location == CARRIED ||
-					Items[LIGHT_SOURCE].Location == MyLoc) {
-					Output(sys[LIGHT_HAS_RUN_OUT]);
-				}
-				if (Options & PREHISTORIC_LAMP)
-					Items[LIGHT_SOURCE].Location = DESTROYED;
-			} else if (GameHeader.LightTime < 25) {
-				if (Items[LIGHT_SOURCE].Location == CARRIED ||
-					Items[LIGHT_SOURCE].Location == MyLoc) {
+        /* Brian Howarth games seem to use -1 for forever */
+        if (Items[LIGHT_SOURCE].Location /*==-1*/ != DESTROYED && GameHeader.LightTime != -1) {
+            GameHeader.LightTime--;
+            if (GameHeader.LightTime < 1) {
+                BitFlags |= (1 << LIGHTOUTBIT);
+                if (Items[LIGHT_SOURCE].Location == CARRIED || Items[LIGHT_SOURCE].Location == MyLoc) {
+                    Output(sys[LIGHT_HAS_RUN_OUT]);
+                }
+                if (Options & PREHISTORIC_LAMP)
+                    Items[LIGHT_SOURCE].Location = DESTROYED;
+            } else if (GameHeader.LightTime < 25) {
+                if (Items[LIGHT_SOURCE].Location == CARRIED || Items[LIGHT_SOURCE].Location == MyLoc) {
 
-					if (Options & SCOTTLIGHT) {
-						Output(sys[LIGHT_RUNS_OUT_IN]);
-						OutputNumber(GameHeader.LightTime);
-						Output(sys[TURNS]);
-					} else {
-						if (GameHeader.LightTime % 5 == 0)
-							Output(sys[LIGHT_GROWING_DIM]);
-					}
-				}
-			}
-		}
-	}
+                    if (Options & SCOTTLIGHT) {
+                        Output(sys[LIGHT_RUNS_OUT_IN]);
+                        OutputNumber(GameHeader.LightTime);
+                        Output(sys[TURNS]);
+                    } else {
+                        if (GameHeader.LightTime % 5 == 0)
+                            Output(sys[LIGHT_GROWING_DIM]);
+                    }
+                }
+            }
+        }
+    }
 }

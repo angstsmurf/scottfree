@@ -13,8 +13,8 @@
 #include "load_TI99_4a.h"
 
 #include "detectgame.h"
-#include "scott.h"
 #include "gameinfo.h"
+#include "scott.h"
 
 #define PACKED __attribute__((__packed__))
 
@@ -63,10 +63,10 @@ uint16_t fix_address(uint16_t ina)
 
 uint16_t fix_word(uint16_t word)
 {
-if (WeAreBigEndian)
-    return word;
-else
-    return (((word & 0xFF) << 8) | ((word >> 8) & 0xFF));
+    if (WeAreBigEndian)
+        return word;
+    else
+        return (((word & 0xFF) << 8) | ((word >> 8) & 0xFF));
 }
 
 uint16_t get_word(uint8_t *mem)
@@ -250,19 +250,19 @@ void read_implicit(struct DATAHEADER dh)
 {
     uint8_t *ptr, *implicit_start;
     int loop_flag;
-    
+
     implicit_start = entire_file + fix_address(fix_word(dh.p_implicit));
     ptr = implicit_start;
     loop_flag = 0;
-    
+
     /* fall out, if no auto acts in the game. */
     if (*ptr == 0x0)
         loop_flag = 1;
-    
+
     while (loop_flag == 0) {
         if (ptr[1] == 0)
             loop_flag = 1;
-        
+
         /* skip code chunk */
         ptr += 1 + ptr[1];
     }
@@ -280,27 +280,27 @@ void read_explicit(struct DATAHEADER dh)
     uint16_t address;
     int loop_flag;
     int i;
-    
+
     size_t explicit_offset = fix_address(fix_word(dh.p_explicit));
     explicit_start = entire_file + explicit_offset;
-    
+
     VerbActionOffsets = MemAlloc(dh.num_verbs * sizeof(uint8_t *));
-    
+
     for (i = 0; i <= dh.num_verbs; i += 1) {
         ptr = explicit_start;
         address = get_word(ptr + ((i)*2));
-        
+
         VerbActionOffsets[i] = NULL;
-        
+
         if (address != 0) {
             ptr = entire_file + fix_address(address);
             VerbActionOffsets[i] = ptr;
             loop_flag = 0;
-            
+
             while (loop_flag != 1) {
                 if (ptr[1] == 0)
                     loop_flag = 1; /* now run get/drop stuff */
-                
+
                 /* go to next block. */
                 ptr += 1 + ptr[1];
             }
@@ -309,15 +309,14 @@ void read_explicit(struct DATAHEADER dh)
             explicit_end = ptr;
     }
 
-//    ti99_explicit_extent = MIN(file_length, explicit_end - entire_file);
-//    fprintf(stderr, "explicit_start - entire_file: %zu\n", explicit_start - entire_file);
-//    fprintf(stderr, "ti99_explicit_extent: %zu\n", ti99_explicit_extent);
-//    if (ti99_explicit_extent) {
-//        ti99_explicit_actions = MemAlloc(ti99_explicit_extent);
-//        memcpy(ti99_explicit_actions, explicit_start, ti99_explicit_extent);
-//    }
+    //    ti99_explicit_extent = MIN(file_length, explicit_end - entire_file);
+    //    fprintf(stderr, "explicit_start - entire_file: %zu\n", explicit_start - entire_file);
+    //    fprintf(stderr, "ti99_explicit_extent: %zu\n", ti99_explicit_extent);
+    //    if (ti99_explicit_extent) {
+    //        ti99_explicit_actions = MemAlloc(ti99_explicit_extent);
+    //        memcpy(ti99_explicit_actions, explicit_start, ti99_explicit_extent);
+    //    }
 }
-
 
 uint8_t *LoadTitleScreen(void)
 {
@@ -330,8 +329,7 @@ uint8_t *LoadTitleScreen(void)
     p = entire_file + 0x80 + file_baseline_offset;
     if (p - entire_file > file_length)
         return NULL;
-    for(lines=0; lines<24; lines++)
-    {
+    for (lines = 0; lines < 24; lines++) {
         for (int i = 0; i < 40; i++) {
             char c = *(p++);
             if (p - entire_file >= file_length)
@@ -506,10 +504,9 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud)
 
     int objectlinks[ni + 1];
 
-    if (seek_if_needed(fix_address(fix_word(dh.p_obj_link)), &offset, &ptr) ==
-        0)
+    if (seek_if_needed(fix_address(fix_word(dh.p_obj_link)), &offset, &ptr) == 0)
         return 0;
-    
+
     do {
         objectlinks[ct] = *(ptr++ - file_baseline_offset);
         if (objectlinks[ct] && objectlinks[ct] <= nw) {
@@ -535,7 +532,7 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud)
     }
 
     Options |= TI994A_STYLE;
-    
-//    free(entire_file);
+
+    //    free(entire_file);
     return TI994A;
 }

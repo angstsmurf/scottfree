@@ -93,15 +93,15 @@ glui32 *ToUnicode(const char *string)
         glui32 unichar = (glui32)c;
         if (GameInfo && CurrentGame == TI994A) {
             switch (c) {
-                case ')':
-                    if (i > 0 && string[i-1] == '\n') {
-                        unicode[dest++] = 0xa9;
-                        unichar = ' ';
-                    }
-                    break;
-                case '}':
-                    unichar = 0xfc;
-                    break;
+            case ')':
+                if (i > 0 && string[i - 1] == '\n') {
+                    unicode[dest++] = 0xa9;
+                    unichar = ' ';
+                }
+                break;
+            case '}':
+                unichar = 0xfc;
+                break;
             }
         }
         unicode[dest++] = unichar;
