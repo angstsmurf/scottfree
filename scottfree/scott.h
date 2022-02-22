@@ -12,14 +12,14 @@
  *	disassembled, only published BASIC sources (PC-SIG, and Byte Dec
  *	1980) have been used.
  */
- 
+
 /*
  *	Controlling block
  */
 
 #ifndef scott_h
 #define scott_h
-  
+
 #define LIGHT_SOURCE 9         /* Always 9 how odd */
 #define CARRIED      255       /* Carried */
 #define DESTROYED    0         /* Destroyed */
@@ -81,6 +81,7 @@ typedef struct {
 #define TRS80_STYLE	8	/* Display in style used on TRS-80 */
 #define PREHISTORIC_LAMP 16	/* Destroy the lamp (very old databases) */
 #define SPECTRUM_STYLE 32    /* Display in style used on ZX Spectrum */
+#define TI994A_STYLE 64     /* Display in style used on TI-99/4A */
 
 #define MAX_GAMEFILE_SIZE 200000
 
@@ -88,9 +89,9 @@ typedef struct {
 
 #include "glk.h"
 
-#define MyLoc    (GameHeader.PlayerRoom)
+#define MyLoc (GameHeader.PlayerRoom)
 
-#define CurrentGame    (GameInfo->gameID)
+#define CurrentGame (GameInfo->gameID)
 
 void Output(const char *a);
 void OutputNumber(int a);
@@ -112,6 +113,12 @@ const char *MapSynonym(int noun);
 void Fatal(const char *x);
 void DrawBlack(void);
 uint8_t *seek_to_pos(uint8_t *buf, int offset);
+int CountCarried(void);
+int RandomPercent(int n);
+void DoneIt(void);
+void LookWithPause(void);
+void SaveGame(void);
+void PrintNoun(void);
 
 extern struct GameInfo *GameInfo;
 extern Header GameHeader;
@@ -135,5 +142,8 @@ extern int AnimationFlag;
 extern int SavedRoom;
 extern int AutoInventory;
 extern int WeAreBigEndian;
+extern int CurrentCounter;
+extern int RoomSaved[];
+extern int Options;
 
 #endif /* scott_h */

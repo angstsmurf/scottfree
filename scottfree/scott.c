@@ -49,6 +49,7 @@
 #include "restorestate.h"
 
 #include "parser.h"
+#include "TI99interp.h"
 
 #include "bsd.h"
 #include "scott.h"
@@ -228,7 +229,7 @@ void *MemAlloc(int size)
     return (t);
 }
 
-static int RandomPercent(int n)
+int RandomPercent(int n)
 {
     unsigned int rv = rand() << 6;
     rv %= 100;
@@ -237,7 +238,7 @@ static int RandomPercent(int n)
     return (0);
 }
 
-static int CountCarried(void)
+int CountCarried(void)
 {
     int ct = 0;
     int n = 0;
@@ -751,10 +752,13 @@ void ListInventoryInUpperWindow(void)
         }
         i++;
     }
-    if (anything == 0)
+    if (anything == 0) {
         WriteToRoomDescriptionStream("%s", sys[NOTHING]);
-    else
+    } else {
+        if (Options & TI994A_STYLE)
+            WriteToRoomDescriptionStream(".");
         WriteToRoomDescriptionStream("\n");
+    }
 }
 
 void Look(void)
@@ -827,6 +831,10 @@ void Look(void)
         ct++;
     }
 
+    if ((Options & TI994A_STYLE) && f) {
+        WriteToRoomDescriptionStream("%s", ".");
+    }
+
     if (Options & SPECTRUM_STYLE) {
         ListExitsSpectrumStyle();
     } else if (f) {
@@ -842,7 +850,7 @@ void Look(void)
         FlushRoomDescription(buf);
 }
 
-static void SaveGame(void)
+void SaveGame(void)
 {
     strid_t file;
     frefid_t ref;
@@ -1171,10 +1179,31 @@ void LookWithPause(void)
     Look();
 }
 
-//#define DEBUG_ACTIONS
+void DoneIt(void) {
+    if (split_screen && Top)
+        Look();
+    dead = 1;
+    if (!before_first_turn) {
+        Output("\n\n");
+        Output(sys[PLAY_AGAIN]);
+        Output("\n");
+        if (YesOrNo()) {
+            RestartGame();
+        } else {
+            if (Transcript)
+                glk_stream_close(Transcript, NULL);
+            glk_exit();
+        }
+    }
+}
 
-int ti99continuation = 0;
-int try_chain = 0;
+void PrintNoun(void) {
+    if (CurrentCommand)
+        glk_put_string_stream_uni(glk_window_get_stream(Bottom),
+                                  UnicodeWords[CurrentCommand->nounwordindex]);
+}
+
+//#define DEBUG_ACTIONS
 
 static int PerformLine(int ct)
 {
@@ -1198,14 +1227,6 @@ static int PerformLine(int ct)
             param[pptr++] = dv;
             break;
         case 1:
-            if (dv > GameHeader.NumItems) {
-                if (dv == ti99continuation) {
-                    ti99continuation = 0;
-                    break;
-                } else {
-                    return (0);
-                }
-            }
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Does the player carry %s?\n", Items[dv].Text);
 #endif
@@ -1213,13 +1234,6 @@ static int PerformLine(int ct)
                 return (0);
             break;
         case 2:
-            if (dv > GameHeader.NumItems) {
-                if (dv == try_chain) {
-                    break;
-                } else {
-                    return (0);
-                }
-            }
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s in location?\n", Items[dv].Text);
 #endif
@@ -1667,38 +1681,6 @@ static int PerformLine(int ct)
 #endif
                 pptr++;
                 break;
-            case 91:
-#ifdef DEBUG_ACTIONS
-                fprintf(stderr, "Show automatic inventory\n");
-#endif
-                AutoInventory = 1;
-                break;
-            case 92:
-#ifdef DEBUG_ACTIONS
-                fprintf(stderr, "Hide automatic inventory\n");
-#endif
-                AutoInventory = 0;
-                break;
-            case 93:
-                ti99continuation = GameHeader.NumItems + ct + 1;
-#ifdef DEBUG_ACTIONS
-                fprintf(stderr, "TI99 continuation set to %d\n", ti99continuation);
-#endif
-                continuation = 1;
-                break;
-            case 94:
-                try_chain = param[pptr++];
-#ifdef DEBUG_ACTIONS
-                fprintf(stderr, "TI99 try chain set to param[pptr] = %d\n", param[pptr - 1]);
-#endif
-                continuation = 1;
-                break;
-            case 95:
-#ifdef DEBUG_ACTIONS
-                fprintf(stderr, "Broke TI99 try chain %d\n", try_chain);
-#endif
-                try_chain = 0;
-                break;
             default:
                 fprintf(stderr, "Unknown action %d [Param begins %d %d]\n",
                     act[cc], param[pptr], param[pptr + 1]);
@@ -1718,7 +1700,8 @@ void PrintTakenOrDropped(int index)
     if (last == 10 || last == 13)
         return;
     Output(" ");
-    if ((CurrentCommand->allflag && (CurrentCommand->allflag & LASTALL) != LASTALL) || split_screen == 0) {
+    if ((!(Options & TI994A_STYLE) &&
+         (CurrentCommand->allflag & LASTALL) != LASTALL) || split_screen == 0) {
         Output("\n");
     }
 }
@@ -1746,7 +1729,7 @@ static int PerformActions(int vb, int no)
             Output(sys[DANGEROUS_TO_MOVE_IN_DARK]);
         nl = Rooms[MyLoc].Exits[no - 1];
         if (nl != 0) {
-            if (Options & SPECTRUM_STYLE)
+            if (Options & (SPECTRUM_STYLE | TI994A_STYLE))
                 Output(sys[OK]);
             MyLoc = nl;
             if (CurrentCommand && CurrentCommand->next) {
@@ -1773,7 +1756,8 @@ static int PerformActions(int vb, int no)
     }
 
     flag = -1;
-    while (ct <= GameHeader.NumActions) {
+    if (CurrentGame != TI994A) {
+        while (ct <= GameHeader.NumActions) {
         int verbvalue, nounvalue;
         verbvalue = Actions[ct].Vocab;
         /* Think this is now right. If a line we run has an action73
@@ -1812,8 +1796,16 @@ static int PerformActions(int vb, int no)
 		 * past the end.
 		 * --Chris
 		 */
-        if (ct <= GameHeader.NumActions && Actions[ct].Vocab != 0)
-            doagain = 0;
+            if (ct <= GameHeader.NumActions && Actions[ct].Vocab != 0)
+                doagain = 0;
+        }
+    } else {
+        if (vb == 0) {
+            run_implicit();
+            return 1;
+        } else {
+            flag = run_explicit(vb, no);
+        }
     }
 
     if (found_match)
@@ -1989,14 +1981,9 @@ void glk_main(void)
         WeAreBigEndian = 1;
     }
 
-    glk_stylehint_set(wintype_TextBuffer,
-        style_Preformatted,
-        stylehint_Justification,
-        stylehint_just_Centered);
-    glk_stylehint_set(wintype_TextBuffer,
-        style_User1,
-        stylehint_Justification,
-        stylehint_just_Centered);
+    glk_stylehint_set(wintype_TextBuffer, style_User1, stylehint_Proportional, 0);
+    glk_stylehint_set(wintype_TextBuffer, style_User1, stylehint_Indentation, 20);
+    glk_stylehint_set(wintype_TextBuffer, style_User1, stylehint_ParaIndentation, 20);
 
     Bottom = glk_window_open(0, 0, 0, wintype_TextBuffer, GLK_BUFFER_ROCK);
     if (Bottom == NULL)
@@ -2026,17 +2013,18 @@ void glk_main(void)
     if (!game_type)
         glk_exit();
 
-    if (game_type != SCOTTFREE) {
+    if (game_type != SCOTTFREE && game_type != TI994A) {
         Options |= SPECTRUM_STYLE;
         split_screen = 1;
     } else {
-        Options |= TRS80_STYLE;
+        if (game_type != TI994A)
+            Options |= TRS80_STYLE;
         split_screen = 1;
     }
 
     if (title_screen != NULL) {
         glk_stream_set_current(glk_window_get_stream(Bottom));
-        glk_set_style(style_Preformatted);
+        glk_set_style(style_User1);
         ClearScreen();
         Output(title_screen);
         free((void *)title_screen);
@@ -2062,69 +2050,73 @@ void glk_main(void)
 //Distributed under the GNU software license\n\n");
 
 #ifdef SPATTERLIGHT
-    if (gli_determinism)
-        srand(1234);
-    else
+	if (gli_determinism)
+		srand(1234);
+	else
 #endif
-        srand((unsigned int)time(NULL));
+		srand((unsigned int)time(NULL));
 
-    if (initial_state == NULL) {
-        initial_state = SaveCurrentState();
-        SaveUndo();
-    }
+	if (initial_state == NULL) {
+		initial_state = SaveCurrentState();
+		SaveUndo();
+	}
 
-    while (1) {
-        glk_tick();
+	while (1) {
+		glk_tick();
 
-        if (!stop_time)
-            PerformActions(0, 0);
-        if (!(CurrentCommand && CurrentCommand->allflag && (CurrentCommand->allflag & LASTALL) != LASTALL))
-            Look();
+		if (!stop_time)
+			PerformActions(0, 0);
+		if (!(CurrentCommand && CurrentCommand->allflag &&
+			  (CurrentCommand->allflag & LASTALL) != LASTALL))
+			Look();
 
-        if (!stop_time && !before_first_turn && !dead)
-            SaveUndo();
+		if (!stop_time && !before_first_turn && !dead)
+			SaveUndo();
 
-        before_first_turn = 0;
+		before_first_turn = 0;
 
-        if (GetInput(&vb, &no) == 1)
-            continue;
+		if (GetInput(&vb, &no) == 1)
+			continue;
 
-        switch (PerformActions(vb, no)) {
-        case -1:
-            if (!RecheckForExtraCommand())
-                Output(sys[I_DONT_UNDERSTAND]);
-            break;
-        case -2:
-            Output(sys[YOU_CANT_DO_THAT_YET]);
-            break;
-        default:
-            just_started = 0;
-            stop_time = 0;
-        }
+		switch (PerformActions(vb, no)) {
+			case -1:
+				if (!RecheckForExtraCommand())
+					Output(sys[I_DONT_UNDERSTAND]);
+				break;
+			case -2:
+				Output(sys[YOU_CANT_DO_THAT_YET]);
+				break;
+			default:
+				just_started = 0;
+				stop_time = 0;
+		}
 
-        /* Brian Howarth games seem to use -1 for forever */
-        if (Items[LIGHT_SOURCE].Location /*==-1*/ != DESTROYED && GameHeader.LightTime != -1) {
-            GameHeader.LightTime--;
-            if (GameHeader.LightTime < 1) {
-                BitFlags |= (1 << LIGHTOUTBIT);
-                if (Items[LIGHT_SOURCE].Location == CARRIED || Items[LIGHT_SOURCE].Location == MyLoc) {
-                    Output(sys[LIGHT_HAS_RUN_OUT]);
-                }
-                if (Options & PREHISTORIC_LAMP)
-                    Items[LIGHT_SOURCE].Location = DESTROYED;
-            } else if (GameHeader.LightTime < 25) {
-                if (Items[LIGHT_SOURCE].Location == CARRIED || Items[LIGHT_SOURCE].Location == MyLoc) {
+		/* Brian Howarth games seem to use -1 for forever */
+		if (Items[LIGHT_SOURCE].Location /*==-1*/ != DESTROYED &&
+			GameHeader.LightTime != -1) {
+			GameHeader.LightTime--;
+			if (GameHeader.LightTime < 1) {
+				BitFlags |= (1 << LIGHTOUTBIT);
+				if (Items[LIGHT_SOURCE].Location == CARRIED ||
+					Items[LIGHT_SOURCE].Location == MyLoc) {
+					Output(sys[LIGHT_HAS_RUN_OUT]);
+				}
+				if (Options & PREHISTORIC_LAMP)
+					Items[LIGHT_SOURCE].Location = DESTROYED;
+			} else if (GameHeader.LightTime < 25) {
+				if (Items[LIGHT_SOURCE].Location == CARRIED ||
+					Items[LIGHT_SOURCE].Location == MyLoc) {
 
-                    if (Options & SCOTTLIGHT) {
-                        Output(sys[LIGHT_RUNS_OUT_IN]);
-                        OutputNumber(GameHeader.LightTime);
-                        Output(sys[TURNS]);
-                    } else {
-                        if (GameHeader.LightTime % 5 == 0)
-                            Output(sys[LIGHT_GROWING_DIM]);
-                    }
-                }
-            }
-        }
-    }
+					if (Options & SCOTTLIGHT) {
+						Output(sys[LIGHT_RUNS_OUT_IN]);
+						OutputNumber(GameHeader.LightTime);
+						Output(sys[TURNS]);
+					} else {
+						if (GameHeader.LightTime % 5 == 0)
+							Output(sys[LIGHT_GROWING_DIM]);
+					}
+				}
+			}
+		}
+	}
 }
