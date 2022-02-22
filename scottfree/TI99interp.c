@@ -638,7 +638,6 @@ int run_code_chunk(uint8_t *code_chunk)
                 {
                     const char *message = Messages[code_chunk[index]];
                     if (message != NULL && message[0] != 0) {
-                        fprintf(stderr, "(%s)\n", message);
                         Output(message);
                         const char lastchar = message[strlen(message) - 1];
                         if (lastchar != 13 && lastchar != 10)
@@ -696,16 +695,16 @@ void run_implicit(void)
     ptr = ti99_implicit_actions;
     loop_flag = 0;
 
-    /* fall out, if no auto acts in the game. */
+    /* fall out if no auto acts in the game. */
     if(*ptr == 0x0)
         loop_flag = 1;
 
     while(loop_flag == 0)
     {
         /*
-         p+0 = percentage of happening
-         p+1 = size of code chunk
-         p+2 = start of code
+         p + 0 = chance of happening
+         p + 1 = size of code chunk
+         p + 2 = start of code
          */
 
         probability = ptr[0];
@@ -721,7 +720,6 @@ void run_implicit(void)
     }
 }
 
-#define BAD_WORD 255
 
 /* parses verb noun actions */
 int run_explicit(int verb_num, int noun_num)
@@ -730,61 +728,45 @@ int run_explicit(int verb_num, int noun_num)
     int flag = 1;
     int runcode;
 
-    if(verb_num != BAD_WORD)
+
+    p = VerbActionOffsets[verb_num];
+
+    /* process all code blocks for this verb
+     until we come to the end of code blocks
+     or until we successfully end a block.
+     */
+
+    flag = RC_NULL;
+    while(flag == RC_NULL)
     {
-        if(noun_num == BAD_WORD)
+        /* we match VERB NOUN or VERB ANY */
+        if(p[0] == noun_num || p[0] == 0)
         {
-            return -1;
-        }
+            /* we have verb/noun match. run code! */
 
-        runcode = 0;
+            runcode = run_code_chunk(p + 2);
 
-        /* continue_code: */
-        /* run code.... */
-        p = ti99_explicit_actions;
-
-        flag = RC_NULL;
-
-        p = VerbActionOffsets[verb_num];
-
-        /* process all code blocks for this verb
-         until we come to the end of code blocks
-         or until we successfully end a block.
-         */
-
-        flag = RC_NULL;
-        runcode = 0;
-        while(flag == RC_NULL)
-        {
-            /* we match CLIMB NOUN or CLIMB ANY */
-            if(p[0] == noun_num || p[0] == 0)
+            if(runcode == 0)		/* success */
             {
-                /* we have verb/noun match. run code! */
-
-                runcode = run_code_chunk(p + 2);
-
-                if(runcode == 0)		/* success */
-                {
-                    flag = RC_OK;
-                    return 0;
-                }
-                else			/* failure */
-                {
-                    if(p[1] == 0)
-                        flag = RC_RAN_ALL_BLOCKS_FAILED;
-                    else
-                        p += 1 + p[1];
-                }
+                return 0;
             }
-            else
+            else			/* failure */
             {
                 if(p[1] == 0)
-                    flag = RC_RAN_ALL_BLOCKS;
+                    flag = RC_RAN_ALL_BLOCKS_FAILED;
                 else
                     p += 1 + p[1];
             }
         }
+        else
+        {
+            if(p[1] == 0)
+                flag = RC_RAN_ALL_BLOCKS;
+            else
+                p += 1 + p[1];
+        }
     }
+
 
     if (flag == RC_RAN_ALL_BLOCKS) {
         return -2;
