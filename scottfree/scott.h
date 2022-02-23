@@ -82,6 +82,7 @@ typedef struct {
 #define PREHISTORIC_LAMP 16	/* Destroy the lamp (very old databases) */
 #define SPECTRUM_STYLE 32    /* Display in style used on ZX Spectrum */
 #define TI994A_STYLE 64     /* Display in style used on TI-99/4A */
+#define NO_DELAYS 128     /* Skip all pauses */
 
 #define MAX_GAMEFILE_SIZE 200000
 
