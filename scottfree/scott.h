@@ -119,6 +119,7 @@ void DoneIt(void);
 void LookWithPause(void);
 void SaveGame(void);
 void PrintNoun(void);
+void PrintScore(void);
 
 extern struct GameInfo *GameInfo;
 extern Header GameHeader;
@@ -145,5 +146,7 @@ extern int WeAreBigEndian;
 extern int CurrentCounter;
 extern int RoomSaved[];
 extern int Options;
+extern int stop_time;
+
 
 #endif /* scott_h */

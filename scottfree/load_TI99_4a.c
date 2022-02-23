@@ -276,46 +276,53 @@ void read_implicit(struct DATAHEADER dh)
 
 void read_explicit(struct DATAHEADER dh)
 {
-    uint8_t *ptr, *explicit_start, *explicit_end = NULL;
+    uint8_t *ptr, *start, *end, *blockstart;
     uint16_t address;
     int loop_flag;
     int i;
 
+    start = entire_file + file_length;
+    end = entire_file;
+
     size_t explicit_offset = fix_address(fix_word(dh.p_explicit));
-    explicit_start = entire_file + explicit_offset;
+    blockstart = entire_file + explicit_offset;
 
     VerbActionOffsets = MemAlloc(dh.num_verbs * sizeof(uint8_t *));
 
-    for (i = 0; i <= dh.num_verbs; i += 1) {
-        ptr = explicit_start;
+    for (i = 0; i <= dh.num_verbs; i++) {
+        ptr = blockstart;
         address = get_word(ptr + ((i)*2));
 
         VerbActionOffsets[i] = NULL;
 
         if (address != 0) {
             ptr = entire_file + fix_address(address);
+            if (ptr < start)
+                start = ptr;
             VerbActionOffsets[i] = ptr;
             loop_flag = 0;
 
             while (loop_flag != 1) {
                 if (ptr[1] == 0)
-                    loop_flag = 1; /* now run get/drop stuff */
+                    loop_flag = 1;
 
                 /* go to next block. */
                 ptr += 1 + ptr[1];
+                if (ptr > end)
+                    end = ptr;
             }
         }
-        if (ptr > explicit_end)
-            explicit_end = ptr;
     }
 
-    //    ti99_explicit_extent = MIN(file_length, explicit_end - entire_file);
-    //    fprintf(stderr, "explicit_start - entire_file: %zu\n", explicit_start - entire_file);
-    //    fprintf(stderr, "ti99_explicit_extent: %zu\n", ti99_explicit_extent);
-    //    if (ti99_explicit_extent) {
-    //        ti99_explicit_actions = MemAlloc(ti99_explicit_extent);
-    //        memcpy(ti99_explicit_actions, explicit_start, ti99_explicit_extent);
-    //    }
+    ti99_explicit_extent = end - start;
+    ti99_explicit_actions = MemAlloc(ti99_explicit_extent);
+    memcpy(ti99_explicit_actions, start, ti99_explicit_extent);
+    for (i = 0; i <= dh.num_verbs; i += 1) {
+        if (VerbActionOffsets[i] != NULL) {
+            VerbActionOffsets[i] = ti99_explicit_actions + (VerbActionOffsets[i] - start);
+        }
+    }
+
 }
 
 uint8_t *LoadTitleScreen(void)
@@ -533,6 +540,6 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud)
 
     Options |= TI994A_STYLE;
 
-    //    free(entire_file);
+    free(entire_file);
     return TI994A;
 }

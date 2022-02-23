@@ -40,7 +40,7 @@
 		C37CE9D927BA79E3003A6649 /* gtstream.c in Sources */ = {isa = PBXBuildFile; fileRef = C37CE96727BA6B6A003A6649 /* gtstream.c */; };
 		C37CE9DC27BA7A26003A6649 /* libglkterm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C37CE9C127BA79B8003A6649 /* libglkterm.a */; };
 		C37CE9DD27BA7A39003A6649 /* libncurses.5.4.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = C37CE99227BA705D003A6649 /* libncurses.5.4.tbd */; };
-		C3D819BF27C58E3F00D97B94 /* TI99interp.c in Sources */ = {isa = PBXBuildFile; fileRef = C3D819BC27C58E3F00D97B94 /* TI99interp.c */; };
+		C3D819BF27C58E3F00D97B94 /* TI99_4a_terp.c in Sources */ = {isa = PBXBuildFile; fileRef = C3D819BC27C58E3F00D97B94 /* TI99_4a_terp.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -137,8 +137,8 @@
 		C37CE99227BA705D003A6649 /* libncurses.5.4.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libncurses.5.4.tbd; path = usr/lib/libncurses.5.4.tbd; sourceTree = SDKROOT; };
 		C37CE9B427BA783E003A6649 /* libglkmain.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libglkmain.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		C37CE9C127BA79B8003A6649 /* libglkterm.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libglkterm.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		C3D819BC27C58E3F00D97B94 /* TI99interp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TI99interp.c; sourceTree = "<group>"; };
-		C3D819BE27C58E3F00D97B94 /* TI99interp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TI99interp.h; sourceTree = "<group>"; };
+		C3D819BC27C58E3F00D97B94 /* TI99_4a_terp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TI99_4a_terp.c; sourceTree = "<group>"; };
+		C3D819BE27C58E3F00D97B94 /* TI99_4a_terp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TI99_4a_terp.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,8 +204,8 @@
 				C37CE8FB27BA697A003A6649 /* layouttext.c */,
 				C37CE8F327BA6979003A6649 /* load_TI99_4a.h */,
 				C37CE90227BA697A003A6649 /* load_TI99_4a.c */,
-				C3D819BE27C58E3F00D97B94 /* TI99interp.h */,
-				C3D819BC27C58E3F00D97B94 /* TI99interp.c */,
+				C3D819BE27C58E3F00D97B94 /* TI99_4a_terp.h */,
+				C3D819BC27C58E3F00D97B94 /* TI99_4a_terp.c */,
 				C37CE8FD27BA697A003A6649 /* parser.h */,
 				C37CE8F927BA697A003A6649 /* parser.c */,
 				C37CE8F027BA6979003A6649 /* README */,
@@ -406,7 +406,7 @@
 				C37CE90D27BA697A003A6649 /* restorestate.c in Sources */,
 				C37CE90527BA697A003A6649 /* scott.c in Sources */,
 				C37CE90A27BA697A003A6649 /* layouttext.c in Sources */,
-				C3D819BF27C58E3F00D97B94 /* TI99interp.c in Sources */,
+				C3D819BF27C58E3F00D97B94 /* TI99_4a_terp.c in Sources */,
 				C37CE90927BA697A003A6649 /* bsd.c in Sources */,
 				C37CE90827BA697A003A6649 /* parser.c in Sources */,
 				C37CE90627BA697A003A6649 /* gameinfo.c in Sources */,

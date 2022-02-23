@@ -48,7 +48,7 @@
 #include "layouttext.h"
 #include "restorestate.h"
 
-#include "TI99interp.h"
+#include "TI99_4a_terp.h"
 #include "parser.h"
 
 #include "bsd.h"
@@ -1198,6 +1198,23 @@ void DoneIt(void)
     }
 }
 
+void PrintScore(void)
+{
+    int i = 0;
+    int n = 0;
+    while (i <= GameHeader.NumItems) {
+        if (Items[i].Location == GameHeader.TreasureRoom && *Items[i].Text == '*')
+            n++;
+        i++;
+    }
+    Display(Bottom, "%s %d %s%s %d.\n", sys[IVE_STORED], n, sys[TREASURES],
+            sys[ON_A_SCALE_THAT_RATES], (n * 100) / GameHeader.Treasures);
+    if (n == GameHeader.Treasures) {
+        Output(sys[YOUVE_SOLVED_IT]);
+        DoneIt();
+    }
+}
+
 void PrintNoun(void)
 {
     if (CurrentCommand)
@@ -1489,45 +1506,16 @@ static int PerformLine(int ct)
 #ifdef DEBUG_ACTIONS
                 fprintf(stderr, "Game over.\n");
 #endif
-            doneit:
-                if (split_screen && Top)
-                    Look();
-                dead = 1;
-                if (!before_first_turn) {
-                    Output("\n\n");
-                    Output(sys[PLAY_AGAIN]);
-                    Output("\n");
-                    if (YesOrNo()) {
-                        RestartGame();
-                        break;
-                    } else {
-                        if (Transcript)
-                            glk_stream_close(Transcript, NULL);
-                        glk_exit();
-                    }
-                }
+                DoneIt();
+                break;
             case 64:
                 break;
-            case 65: {
-                int i = 0;
-                int n = 0;
-                while (i <= GameHeader.NumItems) {
-                    if (Items[i].Location == GameHeader.TreasureRoom && *Items[i].Text == '*')
-                        n++;
-                    i++;
-                }
-                Display(Bottom, "%s %d %s%s %d.\n", sys[IVE_STORED], n, sys[TREASURES],
-                    sys[ON_A_SCALE_THAT_RATES], (n * 100) / GameHeader.Treasures);
-                if (n == GameHeader.Treasures) {
-                    Output(sys[YOUVE_SOLVED_IT]);
-                    goto doneit;
-                }
+            case 65:
+                PrintScore();
                 break;
-            }
-            case 66: {
+            case 66:
                 ListInventory();
                 break;
-            }
             case 67:
                 BitFlags |= (1 << 0);
                 break;
@@ -2088,11 +2076,10 @@ void glk_main(void)
             break;
         default:
             just_started = 0;
-            stop_time = 0;
         }
 
         /* Brian Howarth games seem to use -1 for forever */
-        if (Items[LIGHT_SOURCE].Location /*==-1*/ != DESTROYED && GameHeader.LightTime != -1) {
+        if (Items[LIGHT_SOURCE].Location /*==-1*/ != DESTROYED && GameHeader.LightTime != -1 && !stop_time) {
             GameHeader.LightTime--;
             if (GameHeader.LightTime < 1) {
                 BitFlags |= (1 << LIGHTOUTBIT);
@@ -2115,5 +2102,6 @@ void glk_main(void)
                 }
             }
         }
+        stop_time = 0;
     }
 }
