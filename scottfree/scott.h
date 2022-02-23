@@ -49,7 +49,7 @@ typedef struct {
 typedef struct {
 	unsigned short Vocab;
 	unsigned short Condition[5];
-	unsigned short Action[2];
+	unsigned short Subcommand[2];
 } Action;
 
 typedef struct {

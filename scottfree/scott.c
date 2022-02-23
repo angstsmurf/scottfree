@@ -444,8 +444,8 @@ int LoadDatabase(FILE *f, int loud)
                 &ap->Condition[2],
                 &ap->Condition[3],
                 &ap->Condition[4],
-                &ap->Action[0],
-                &ap->Action[1])
+                &ap->Subcommand[0],
+                &ap->Subcommand[1])
             != 8) {
             fprintf(stderr, "Bad action line (%d)\n", ct);
             FreeDatabase();
@@ -459,8 +459,8 @@ int LoadDatabase(FILE *f, int loud)
             fprintf(stderr, "Action %d Condition[2]: %d (%d/%d)\n", ct, ap->Condition[2], ap->Condition[2] % 20, ap->Condition[2] / 20);
             fprintf(stderr, "Action %d Condition[0]: %d (%d/%d)\n", ct, ap->Condition[3], ap->Condition[3] % 20, ap->Condition[3] / 20);
             fprintf(stderr, "Action %d Condition[0]: %d (%d/%d)\n", ct, ap->Condition[4], ap->Condition[4] % 20, ap->Condition[4] / 20);
-            fprintf(stderr, "Action %d Action[0]: %d\n", ct, ap->Action[0]);
-            fprintf(stderr, "Action %d Action[1]: %d\n\n", ct, ap->Action[1]);
+            fprintf(stderr, "Action %d Subcommand[0]: %d\n", ct, ap->Subcommand[0]);
+            fprintf(stderr, "Action %d Subcommand[1]: %d\n\n", ct, ap->Subcommand[1]);
         }
 
         ap++;
@@ -1391,8 +1391,8 @@ static int PerformLine(int ct)
 #endif
 
     /* Actions */
-    act[0] = Actions[ct].Action[0];
-    act[2] = Actions[ct].Action[1];
+    act[0] = Actions[ct].Subcommand[0];
+    act[2] = Actions[ct].Subcommand[1];
     act[1] = act[0] % 150;
     act[3] = act[2] % 150;
     act[0] /= 150;

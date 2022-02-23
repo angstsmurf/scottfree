@@ -36,8 +36,8 @@ Following the header is a list of game actions. Each is of the form
 
 150*verb+noun
 5 repeats of condition+20*value
-150*action1+action2
-150*action3+action4
+150*command1+command2
+150*command3+command4
 
 Conditions
 
