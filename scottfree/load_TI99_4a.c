@@ -518,7 +518,6 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud)
         objectlinks[ct] = *(ptr++ - file_baseline_offset);
         if (objectlinks[ct] && objectlinks[ct] <= nw) {
             ip->AutoGet = (char *)Nouns[objectlinks[ct]];
-            fprintf(stderr, "Item %d (%s) autoget: %s\n", ct, ip->Text, ip->AutoGet);
         } else {
             ip->AutoGet = NULL;
         }
