@@ -563,7 +563,7 @@ int LoadDatabase(FILE *f, int loud)
     }
     if (loud)
         fprintf(stderr, "%d.\nLoad Complete.\n\n", ct);
-    return 1;
+    return SCOTTFREE;
 }
 
 void Output(const char *a)
@@ -575,6 +575,7 @@ void OutputNumber(int a)
 {
     Display(Bottom, "%d", a);
 }
+
 #if defined(__clang__)
 #pragma mark Room description
 #endif
@@ -1213,7 +1214,7 @@ void PrintNoun(void)
 
 //#define DEBUG_ACTIONS
 
-static int PerformLine(int ct)
+static ActionResultType PerformLine(int ct)
 {
 #ifdef DEBUG_ACTIONS
     fprintf(stderr, "Performing line %d: ", ct);
@@ -1239,126 +1240,126 @@ static int PerformLine(int ct)
             fprintf(stderr, "Does the player carry %s?\n", Items[dv].Text);
 #endif
             if (Items[dv].Location != CARRIED)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 2:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s in location?\n", Items[dv].Text);
 #endif
             if (Items[dv].Location != MyLoc)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 3:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s held or in location?\n", Items[dv].Text);
 #endif
             if (Items[dv].Location != CARRIED && Items[dv].Location != MyLoc)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 4:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is location %s?\n", Rooms[dv].Text);
 #endif
             if (MyLoc != dv)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 5:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s NOT in location?\n", Items[dv].Text);
 #endif
             if (Items[dv].Location == MyLoc)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 6:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Does the player NOT carry %s?\n", Items[dv].Text);
 #endif
             if (Items[dv].Location == CARRIED)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 7:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is location NOT %s?\n", Rooms[dv].Text);
 #endif
             if (MyLoc == dv)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 8:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is bitflag %d set?\n", dv);
 #endif
             if ((BitFlags & (1 << dv)) == 0)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 9:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is bitflag %d NOT set?\n", dv);
 #endif
             if (BitFlags & (1 << dv))
-                return (0);
+                return ACT_FAILURE;
             break;
         case 10:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Does the player carry anything?\n");
 #endif
             if (CountCarried() == 0)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 11:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Does the player carry nothing?\n");
 #endif
             if (CountCarried())
-                return (0);
+                return ACT_FAILURE;
             break;
         case 12:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s neither carried nor in room?\n", Items[dv].Text);
 #endif
             if (Items[dv].Location == CARRIED || Items[dv].Location == MyLoc)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 13:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s (%d) in play?\n", Items[dv].Text, dv);
 #endif
             if (Items[dv].Location == 0)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 14:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s NOT in play?\n", Items[dv].Text);
 #endif
             if (Items[dv].Location)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 15:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is CurrentCounter <= %d?\n", dv);
 #endif
             if (CurrentCounter > dv)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 16:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is CurrentCounter > %d?\n", dv);
 #endif
             if (CurrentCounter <= dv)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 17:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s still in initial room?\n", Items[dv].Text);
 #endif
             if (Items[dv].Location != Items[dv].InitialLoc)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 18:
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Has %s been moved?\n", Items[dv].Text);
 #endif
             if (Items[dv].Location == Items[dv].InitialLoc)
-                return (0);
+                return ACT_FAILURE;
             break;
         case 19: /* Only seen in Brian Howarth games so far */
 #ifdef DEBUG_ACTIONS
@@ -1367,7 +1368,7 @@ static int PerformLine(int ct)
                 fprintf(stderr, "Nope, current counter is %d\n", CurrentCounter);
 #endif
             if (CurrentCounter != dv)
-                return (0);
+                return ACT_FAILURE;
             break;
         }
 #ifdef DEBUG_ACTIONS
@@ -1649,7 +1650,6 @@ static int PerformLine(int ct)
                 pptr++;
                 switch (CurrentGame) {
                 default:
-                    fprintf(stderr, "Action 89 in unsupported game!\n");
                     break;
                 }
                 break;
@@ -1668,7 +1668,10 @@ static int PerformLine(int ct)
         cc++;
     }
 
-    return (1 + continuation);
+    if (continuation)
+        return ACT_CONTINUE;
+    else
+        return ACT_SUCCESS;
 }
 
 void PrintTakenOrDropped(int index)
@@ -1684,12 +1687,12 @@ void PrintTakenOrDropped(int index)
     }
 }
 
-static int PerformActions(int vb, int no)
+static ExplicitResultType PerformActions(int vb, int no)
 {
     int dark = BitFlags & (1 << DARKBIT);
 
     int ct = 0;
-    int flag;
+    ExplicitResultType flag;
     int doagain = 0;
     int found_match = 0;
 #if defined(__clang__)
@@ -1697,7 +1700,7 @@ static int PerformActions(int vb, int no)
 #endif
     if (vb == GO && no == -1) {
         Output(sys[DIRECTION]);
-        return (0);
+        return ER_SUCCESS;
     }
     if (vb == 1 && no >= 1 && no <= 6) {
         int nl;
@@ -1713,7 +1716,7 @@ static int PerformActions(int vb, int no)
             if (CurrentCommand && CurrentCommand->next) {
                 LookWithPause();
             }
-            return (0);
+            return ER_SUCCESS;
         }
         if (dark) {
             Output(sys[YOU_FELL_AND_BROKE_YOUR_NECK]);
@@ -1722,7 +1725,7 @@ static int PerformActions(int vb, int no)
             Output("\n");
             if (YesOrNo()) {
                 RestartGame();
-                return 0;
+                return ER_SUCCESS;
             } else {
                 if (Transcript)
                     glk_stream_close(Transcript, NULL);
@@ -1730,10 +1733,10 @@ static int PerformActions(int vb, int no)
             }
         }
         Output(sys[YOU_CANT_GO_THAT_WAY]);
-        return (0);
+        return ER_SUCCESS;
     }
 
-    flag = -1;
+    flag = ER_RAN_ALL_LINES_NO_MATCH;
     if (CurrentGame != TI994A) {
         while (ct <= GameHeader.NumActions) {
             int verbvalue, nounvalue;
@@ -1751,16 +1754,16 @@ static int PerformActions(int vb, int no)
                 if ((verbvalue == 0 && RandomPercent(nounvalue)) || doagain || (verbvalue != 0 && (nounvalue == no || nounvalue == 0))) {
                     if (verbvalue == vb && vb != 0 && no != 0 && nounvalue == no)
                         found_match = 1;
-                    int f2;
-                    if (flag == -1)
-                        flag = -2;
-                    if ((f2 = PerformLine(ct)) > 0) {
+                    ActionResultType flag2;
+                    if (flag == ER_RAN_ALL_LINES_NO_MATCH)
+                        flag = ER_RAN_ALL_LINES;
+                    if ((flag2 = PerformLine(ct)) != ACT_FAILURE) {
                         /* ahah finally figured it out ! */
-                        flag = 0;
-                        if (f2 == 2)
+                        flag = ER_SUCCESS;
+                        if (flag2 == ACT_CONTINUE)
                             doagain = 1;
                         if (vb != 0 && doagain == 0)
-                            return (0);
+                            return ER_SUCCESS;
                     }
                 }
             }
@@ -1780,7 +1783,7 @@ static int PerformActions(int vb, int no)
     } else {
         if (vb == 0) {
             run_implicit();
-            return 1;
+            return ER_NO_RESULT;
         } else {
             flag = run_explicit(vb, no);
         }
@@ -1789,7 +1792,7 @@ static int PerformActions(int vb, int no)
     if (found_match)
         return flag;
 
-    if (flag != 0) {
+    if (flag != ER_SUCCESS) {
         int item = 0;
         if (Items[LIGHT_SOURCE].Location == MyLoc || Items[LIGHT_SOURCE].Location == CARRIED)
             dark = 0;
@@ -1803,7 +1806,7 @@ static int PerformActions(int vb, int no)
                     while ((CurrentCommand->allflag & LASTALL) != LASTALL) {
                         CurrentCommand = CurrentCommand->next;
                     }
-                    return 0;
+                    return ER_SUCCESS;
                 }
                 item = CurrentCommand->item;
                 int location = CARRIED;
@@ -1813,7 +1816,7 @@ static int PerformActions(int vb, int no)
                     CurrentCommand = CurrentCommand->next;
                 }
                 if (Items[item].Location != location)
-                    return 0;
+                    return ER_SUCCESS;
                 Output(Items[CurrentCommand->item].Text);
                 Output("....");
             }
@@ -1822,11 +1825,11 @@ static int PerformActions(int vb, int no)
             if (vb == TAKE) {
                 if (no == -1) {
                     Output(sys[WHAT]);
-                    return (0);
+                    return ER_SUCCESS;
                 }
                 if (CountCarried() == GameHeader.MaxCarry) {
                     Output(sys[YOURE_CARRYING_TOO_MUCH]);
-                    return (0);
+                    return ER_SUCCESS;
                 }
                 if (!item)
                     item = MatchUpItem(no, MyLoc);
@@ -1842,11 +1845,11 @@ static int PerformActions(int vb, int no)
                     } else {
                         Output(sys[YOU_HAVE_IT]);
                     }
-                    return (0);
+                    return ER_SUCCESS;
                 }
                 Items[item].Location = CARRIED;
                 PrintTakenOrDropped(TAKEN);
-                return (0);
+                return ER_SUCCESS;
             }
 #if defined(__clang__)
 #pragma mark DROP
@@ -1854,7 +1857,7 @@ static int PerformActions(int vb, int no)
             if (vb == DROP) {
                 if (no == -1) {
                     Output(sys[WHAT]);
-                    return (0);
+                    return ER_SUCCESS;
                 }
                 if (!item)
                     item = MatchUpItem(no, CARRIED);
@@ -1865,15 +1868,15 @@ static int PerformActions(int vb, int no)
                     } else {
                         Output(sys[YOU_HAVENT_GOT_IT]);
                     }
-                    return (0);
+                    return ER_SUCCESS;
                 }
                 Items[item].Location = MyLoc;
                 PrintTakenOrDropped(DROPPED);
-                return (0);
+                return ER_SUCCESS;
             }
         }
     }
-    return (flag);
+    return flag;
 }
 
 glkunix_argumentlist_t glkunix_arguments[] = {
@@ -2025,11 +2028,11 @@ void glk_main(void)
 
     OpenTopWindow();
 
-    //	if (game_type == SCOTTFREE)
-    //		Output("\
-//Scott Free, A Scott Adams game driver in C.\n\
-//Release 1.14, (c) 1993,1994,1995 Swansea University Computer Society.\n\
-//Distributed under the GNU software license\n\n");
+    if (game_type == SCOTTFREE)
+        Output("\
+Scott Free, A Scott Adams game driver in C.\n\
+Release 1.14, (c) 1993,1994,1995 Swansea University Computer Society.\n\
+Distributed under the GNU software license\n\n");
 
 #ifdef SPATTERLIGHT
     if (gli_determinism)
@@ -2060,11 +2063,11 @@ void glk_main(void)
             continue;
 
         switch (PerformActions(vb, no)) {
-        case -1:
+        case ER_RAN_ALL_LINES_NO_MATCH:
             if (!RecheckForExtraCommand())
                 Output(sys[I_DONT_UNDERSTAND]);
             break;
-        case -2:
+        case ER_RAN_ALL_LINES:
             Output(sys[YOU_CANT_DO_THAT_YET]);
             break;
         default:

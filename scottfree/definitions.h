@@ -28,8 +28,20 @@ typedef enum {
     NUMGAMES
 } GameIDType;
 
-typedef enum
-{
+typedef enum {
+    ER_NO_RESULT,
+    ER_SUCCESS = 0,
+    ER_RAN_ALL_LINES_NO_MATCH = -1,
+    ER_RAN_ALL_LINES = -2
+} ExplicitResultType;
+
+typedef enum {
+    ACT_SUCCESS = 0,
+    ACT_FAILURE = 1,
+    ACT_CONTINUE
+} ActionResultType;
+
+typedef enum {
     NORTH,
     SOUTH,
     EAST,

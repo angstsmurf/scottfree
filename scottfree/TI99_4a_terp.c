@@ -5,107 +5,7 @@
 #include "scott.h"
 #include "TI99_4a_terp.h"
 
-enum {
-    RC_NULL = 0,
-    RC_OK,
-    RC_RAN_ALL_BLOCKS,
-    RC_RAN_ALL_BLOCKS_FAILED
-};
-
-struct Keyword {
-    const char *name;
-    int opcode;
-    int count;
-};
-
-struct Keyword actions[] = {
-    { "has", 0xB7, 1 },
-    { "here", 0xB8, 1 },
-    { "avail", 0xB9, 1 },
-    { "!here", 0xBA, 1 },
-    { "!has", 0xBB, 1 },
-    { "!avail", 0xBC, 1 },
-    { "exists", 0xBD, 1 },
-    { "!exists", 0xBE, 1 },
-    { "in", 0xBF, 1 },
-    { "!in", 0xC0, 1 },
-    { "set", 0xC1, 1 },
-    { "!set", 0xC2, 1 },
-    { "something", 0xC3, 0 },
-    { "nothing", 0xC4, 0 },
-    { "le", 0xC5, 1 },
-    { "gt", 0xC6, 1 },
-    { "eq", 0xC7, 1 },
-    { "!moved", 0xC8, 1 },
-    { "moved", 0xC9, 1 },
-
-    { "--0xCA--", 0xCA, 0 },
-    { "--0xCB--", 0xCB, 0 },
-    { "--0xCC--", 0xCC, 0 },
-    { "--0xCD--", 0xCD, 0 },
-    { "--0xCE--", 0xCE, 0 },
-    { "--0xCF--", 0xCF, 0 },
-    { "--0xD0--", 0xD0, 0 },
-    { "--0xD1--", 0xD1, 0 },
-    { "--0xD2--", 0xD2, 0 },
-    { "--0xD3--", 0xD3, 0 },
-
-    { "cls", 0xD4, 0 },
-    { "pic", 0xD5, 0 },
-    { "inv", 0xD6, 0 },
-    { "!inv", 0xD7, 0 },
-    { "ignore", 0xD8, 0 },
-    { "success", 0xD9, 0 },
-    { "try", 0xDA, 1 },
-    { "get", 0xDB, 1 },
-    { "drop", 0xDC, 1 },
-    { "goto", 0xDD, 1 },
-    { "zap", 0xDE, 1 },
-    { "on", 0xDF, 0 }, /* on dark */
-    { "off", 0xE0, 0 }, /* off dark */
-    { "on", 0xE1, 1 }, /* set flag */
-    { "off", 0xE2, 1 }, /* clear flag */
-    { "on", 0xE3, 0 },
-    { "off", 0xE4, 0 },
-    { "die", 0xE5, 0 },
-    { "move", 0xE6, 2 },
-    { "quit", 0xE7, 0 },
-    { ".score", 0xE8, 0 },
-    { ".inv", 0xE9, 0 },
-    { "refill", 0xEA, 0 },
-    { "save", 0xEB, 0 },
-    { "swap", 0xEC, 2 }, /* swap items */
-    { "steal", 0xED, 1 },
-    { "same", 0xEE, 2 },
-    { "nop", 0xEF, 0 },
-
-    { ".room", 0xF0, 0 },
-
-    { "--0xF1--", 0xF1, 0 },
-    { "add", 0xF2, 0 },
-    { "sub", 0xF3, 0 },
-
-    { ".timer", 0xF4, 0 },
-    { "timer", 0xF5, 1 },
-
-    { "add", 0xF6, 1 },
-    { "sub", 0xF7, 1 },
-
-    /* TODO : implement Select RV (0xF8) and Swap RV (0xF9) */
-    { "select_rv", 0xF8, 0 },
-    { "swap_rv", 0xF9, 1 },
-
-    { "swap", 0xFA, 1 }, /* swap flag */
-
-    { ".noun", 0xFB, 0 },
-    { ".noun_nl", 0xFC, 0 },
-    { ".nl", 0xFD, 0 },
-    { "delay", 0xFE, 0 },
-
-    { "", 0xFF, 0 }
-};
-
-int run_code_chunk(uint8_t *code_chunk)
+ActionResultType run_code_chunk(uint8_t *code_chunk)
 {
     if (code_chunk == NULL)
         return 1;
@@ -113,148 +13,141 @@ int run_code_chunk(uint8_t *code_chunk)
     uint8_t *ptr = code_chunk;
     int run_code = 0;
     int index = 0;
-    int result = 0;
-    int opcode;
+    ActionResultType result = ACT_FAILURE;
+    int opcode, param, param2;
+
 
     int try_index;
     int try[32];
-
-    int bytes_from_end = 100;
-
-    /* 0: Success, 1: Failure  */
-    result = 1;
 
     try_index = 0;
     int temp;
 
     while (run_code == 0) {
-        int dv = 0, param2 = 0;
-        if (bytes_from_end > 0)
-            dv = code_chunk[index + 1];
-        if (bytes_from_end > 1)
-            param2 = code_chunk[index + 2];
-
         opcode = *(ptr++);
 
         switch (opcode) {
-        case 183: /* ITEM is in inventory */
+        case 183: /* is p in inventory? */
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Does the player carry %s?\n", Items[*ptr].Text);
 #endif
             if (Items[*(ptr++)].Location != CARRIED) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 184: /* ITEM is in room */
+        case 184: /* is p in room? */
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s in location?\n", Items[*ptr].Text);
 #endif
             if (Items[*(ptr++)].Location != MyLoc) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
 
             break;
 
-        case 185: /* ITEM is available */
+        case 185: /* is p available? */
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Is %s held or in location?\n", Items[*ptr].Text);
 #endif
-            if (Items[*ptr].Location != CARRIED && Items[*(ptr++)].Location != MyLoc) {
+            if (Items[*ptr].Location != CARRIED && Items[*ptr].Location != MyLoc) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
+            }
+            ptr++;
+            break;
+
+        case 186: /* is p here? */
+#ifdef DEBUG_ACTIONS
+            fprintf(stderr, "Is %s NOT in location?\n", Items[*ptr].Text);
+#endif
+            if (Items[*(ptr++)].Location == MyLoc) {
+                run_code = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 186: /* ITEM is NOT in room */
+        case 187: /* is p NOT in inventory? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is %s NOT in location?\n", Items[dv].Text);
+            fprintf(stderr, "Does the player NOT carry %s?\n", Items[*ptr].Text);
 #endif
-            if (Items[dv].Location == MyLoc) {
+            if (Items[*(ptr++)].Location == CARRIED) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 187: /* ITEM is NOT in inventory */
+        case 188: /* is p NOT available? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Does the player NOT carry %s?\n", Items[dv].Text);
+            fprintf(stderr, "Is %s neither carried nor in room?\n", Items[*ptr].Text);
 #endif
-            if (Items[dv].Location == CARRIED) {
+
+            if (Items[*ptr].Location == CARRIED || Items[*ptr].Location == MyLoc) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
+            }
+            ptr++;
+            break;
+
+        case 189: /* is p in play? */
+#ifdef DEBUG_ACTIONS
+            fprintf(stderr, "Is %s (%d) in play?\n", Items[*ptr].Text, dv);
+#endif
+            if (Items[*(ptr++)].Location == 0) {
+                run_code = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 188: /* object NOT available */
+        case 190: /* Is object p NOT in play? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is %s neither carried nor in room?\n", Items[dv].Text);
+            fprintf(stderr, "Is %s NOT in play?\n", Items[*ptr].Text);
 #endif
-            if (Items[dv].Location == CARRIED || Items[dv].Location == MyLoc) {
+            if (Items[*(ptr++)].Location != 0) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 189: /* object exists */
+        case 191: /* Is player is in room p? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is %s (%d) in play?\n", Items[dv].Text, dv);
+            fprintf(stderr, "Is location %s?\n", Rooms[*ptr].Text);
 #endif
-            if (Items[dv].Location == 0) {
+            if (MyLoc != *(ptr++)) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 190: /* object does not exist */
+        case 192: /* Is player NOT in room p? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is %s NOT in play?\n", Items[dv].Text);
+            fprintf(stderr, "Is location NOT %s?\n", Rooms[*ptr].Text);
 #endif
-            if (Items[dv].Location != 0) {
+            if (MyLoc == *(ptr++)) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 191: /* Player is in room X */
+        case 193: /* Is bitflag p clear? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is location %s?\n", Rooms[dv].Text);
+            fprintf(stderr, "Is bitflag %d set?\n", *ptr);
 #endif
-            if (MyLoc != dv) {
+            if ((BitFlags & (1 << *(ptr++))) == 0) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 192: /* Player not in room X */
+        case 194: /* Is bitflag p set? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is location NOT %s?\n", Rooms[dv].Text);
+            fprintf(stderr, "Is bitflag %d NOT set?\n", *ptr);
 #endif
-            if (MyLoc == dv) {
+            if (BitFlags & (1 << *(ptr++))) {
                 run_code = 1;
-                result = 1;
-            }
-            break;
-
-        case 193: /* Is bitflag dv clear? */
-#ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is bitflag %d set?\n", dv);
-#endif
-            if ((BitFlags & (1 << dv)) == 0) {
-                run_code = 1;
-                result = 1;
-            }
-            break;
-
-        case 194: /* Is bitflag dv set? */
-#ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is bitflag %d NOT set?\n", dv);
-#endif
-            if (BitFlags & (1 << dv)) {
-                run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
@@ -264,7 +157,7 @@ int run_code_chunk(uint8_t *code_chunk)
 #endif
             if (CountCarried() == 0) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
@@ -274,60 +167,60 @@ int run_code_chunk(uint8_t *code_chunk)
 #endif
             if (CountCarried()) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 197: /* Is CurrentCounter <= dv */
+        case 197: /* Is CurrentCounter <= p? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is CurrentCounter <= %d?\n", dv);
+            fprintf(stderr, "Is CurrentCounter <= %d?\n", *ptr);
 #endif
-            if (CurrentCounter > dv) {
+            if (CurrentCounter > *(ptr++)) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 198: /* Is CurrentCounter > dv */
+        case 198: /* Is CurrentCounter > p? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is CurrentCounter > %d?\n", dv);
+            fprintf(stderr, "Is CurrentCounter > %d?\n", *ptr);
 #endif
-            if (CurrentCounter <= dv) {
+            if (CurrentCounter <= *(ptr++)) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 199: /* Is current counter ==  dv */
+        case 199: /* Is CurrentCounter == p? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is current counter == %d?\n", dv);
-            if (CurrentCounter != dv)
-                fprintf(stderr, "Nope, current counter is %d\n", CurrentCounter);
+            fprintf(stderr, "Is current counter == %d?\n", *ptr);
 #endif
-            if (CurrentCounter != dv) {
+            if (CurrentCounter != *(ptr++)) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
             break;
 
-        case 200: /* Is item dv still in initial room? */
+        case 200: /* Is item p still in initial room? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Is %s still in initial room?\n", Items[dv].Text);
+            fprintf(stderr, "Is %s still in initial room?\n", Items[*ptr].Text);
 #endif
-            if (Items[dv].Location != Items[dv].InitialLoc) {
+            if (Items[*ptr].Location != Items[*ptr].InitialLoc) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
+            ptr++;
             break;
 
-        case 201: /* Has item dv been moved? */
+        case 201: /* Has item p been moved? */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "Has %s been moved?\n", Items[dv].Text);
+            fprintf(stderr, "Has %s been moved?\n", Items[*ptr].Text);
 #endif
-            if (Items[dv].Location == Items[dv].InitialLoc) {
+            if (Items[*ptr].Location == Items[*ptr].InitialLoc) {
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
             }
+            ptr++;
             break;
 
         case 212: /* clear screen */
@@ -341,52 +234,55 @@ int run_code_chunk(uint8_t *code_chunk)
         case 215: /* !inv */
             AutoInventory = 0;
             break;
+
         case 216:
         case 217:
             break;
+
         case 218:
             if (try_index >= 32) {
                 Fatal("ERROR Hit upper limit on try method.\n");
             }
-
-            try[try_index++] = index + dv + 1;
+            try[try_index++] = ptr - code_chunk + *ptr;
+            ptr++;
             break;
 
         case 219: /* get item */
             if (CountCarried() == GameHeader.MaxCarry) {
                 Output(sys[YOURE_CARRYING_TOO_MUCH]);
                 run_code = 1;
-                result = 1;
+                result = ACT_FAILURE;
                 break;
             } else {
-                Items[dv].Location = CARRIED;
+                Items[*ptr].Location = CARRIED;
             }
+            ptr++;
             break;
 
         case 220: /* drop item */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "item %d (\"%s\") is now in location.\n", dv,
-                Items[dv].Text);
+            fprintf(stderr, "item %d (\"%s\") is now in location.\n", *ptr,
+                Items[*ptr].Text);
 #endif
-            Items[dv].Location = MyLoc;
+            Items[*(ptr++)].Location = MyLoc;
             break;
 
-        case 221: /* goto room */
+        case 221: /* go to room */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr, "player location is now room %d (%s).\n", dv,
-                Rooms[dv].Text);
+            fprintf(stderr, "player location is now room %d (%s).\n", *ptr,
+                Rooms[*ptr].Text);
 #endif
-            MyLoc = dv;
+            MyLoc = *(ptr++);
             Look();
             break;
 
-        case 222: /* move item B to room 0 */
+        case 222: /* move item p to room 0 */
 #ifdef DEBUG_ACTIONS
             fprintf(stderr,
                 "Item %d (%s) is removed from the game (put in room 0).\n",
-                dv, Items[dv].Text);
+                    *ptr, Items[*ptr].Text);
 #endif
-            Items[dv].Location = 0;
+            Items[*(ptr++)].Location = 0;
             break;
 
         case 223: /* darkness */
@@ -397,18 +293,18 @@ int run_code_chunk(uint8_t *code_chunk)
             BitFlags &= ~(1 << DARKBIT);
             break;
 
-        case 225: /* set flag dv */
+        case 225: /* set flag p */
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Bitflag %d is set\n", dv);
 #endif
-            BitFlags |= (1 << dv);
+            BitFlags |= (1 << *(ptr++));
             break;
 
-        case 226: /* clear flag dv */
+        case 226: /* clear flag p */
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Bitflag %d is cleared\n", dv);
 #endif
-            BitFlags &= ~(1 << dv);
+            BitFlags &= ~(1 << *(ptr++));
             break;
 
         case 227: /* set flag 0 */
@@ -431,23 +327,24 @@ int run_code_chunk(uint8_t *code_chunk)
 #endif
             Output(sys[IM_DEAD]);
             dead = 1;
-            LookWithPause();
             BitFlags &= ~(1 << DARKBIT);
             MyLoc = GameHeader.NumRooms; /* It seems to be what the code says! */
             stop_time = 1;
             break;
 
-        case 230: /* move item B to room A */
+        case 230: /* move item p2 to room p */
+            param = *(ptr++);
+            param2 = *(ptr++);
 #ifdef DEBUG_ACTIONS
             fprintf(stderr, "Item %d (%s) is put in room %d (%s).\n",
-                param2, Items[param2].Text, dv, Rooms[dv].Text);
+                param2, Items[param2].Text, param, Rooms[param].Text);
 #endif
-            Items[param2].Location = dv;
+            Items[param2].Location = param;
             break;
 
         case 231: /* quit */
             DoneIt();
-            break;
+            return ACT_SUCCESS;
 
         case 232: /* print score */
             PrintScore();
@@ -459,7 +356,7 @@ int run_code_chunk(uint8_t *code_chunk)
             stop_time = 1;
             break;
 
-        case 234: /* refill */
+        case 234: /* refill lightsource */
             GameHeader.LightTime = LightRefill;
             Items[LIGHT_SOURCE].Location = CARRIED;
             BitFlags &= ~(1 << LIGHTOUTBIT);
@@ -470,23 +367,27 @@ int run_code_chunk(uint8_t *code_chunk)
             stop_time = 1;
             break;
 
-        case 236: /* swap items 1 and 2 around */
-            temp = Items[dv].Location;
-            Items[dv].Location = Items[param2].Location;
+        case 236: /* swap items p and p2 around */
+            param = *(ptr++);
+            param2 = *(ptr++);
+            temp = Items[param].Location;
+            Items[param].Location = Items[param2].Location;
             Items[param2].Location = temp;
             break;
 
-        case 237: /* move an item to the inventory */
+        case 237: /* move item p to the inventory */
 #ifdef DEBUG_ACTIONS
             fprintf(stderr,
                 "Player now carries item %d (%s).\n",
-                dv, Items[dv].Text);
+                    *ptr, Items[*ptr].Text);
 #endif
-            Items[dv].Location = CARRIED;
+            Items[*(ptr++)].Location = CARRIED;
             break;
 
-        case 238: /* make item1 same room as item2 */
-            Items[dv].Location = Items[param2].Location;
+        case 238: /* make item p same room as item p2 */
+            param = *(ptr++);
+            param2 = *(ptr++);
+            Items[param].Location = Items[param2].Location;
             break;
 
         case 239: /* nop */
@@ -496,40 +397,41 @@ int run_code_chunk(uint8_t *code_chunk)
             Look();
             break;
 
-        case 242: /* add 1 to timer */
+        case 241: /* unknown */
+            break;
+
+        case 242: /* add 1 to current counter */
             CurrentCounter++;
             break;
 
-        case 243: /* sub 1 from timer */
+        case 243: /* sub 1 from current counter */
             if (CurrentCounter >= 1)
                 CurrentCounter--;
             break;
 
-        case 244: /* print current timer */
+        case 244: /* print current counter */
             OutputNumber(CurrentCounter);
             Output(" ");
             break;
 
-        case 245: /* set current counter */
+        case 245: /* set current counter to p */
 #ifdef DEBUG_ACTIONS
-            fprintf(stderr,
-                "CurrentCounter is set to %d.\n",
-                dv);
+            fprintf(stderr, "CurrentCounter is set to %d.\n", dv);
 #endif
-            CurrentCounter = dv;
+            CurrentCounter = *(ptr++);
             break;
 
         case 246: /*  add to current counter */
 #ifdef DEBUG_ACTIONS
             fprintf(stderr,
                 "%d is added to currentCounter. Result: %d\n",
-                dv, CurrentCounter + dv);
+                    *ptr, CurrentCounter + *ptr);
 #endif
-            CurrentCounter += dv;
+            CurrentCounter += *(ptr++);
             break;
 
         case 247: /* sub from current counter */
-            CurrentCounter -= dv;
+            CurrentCounter -= *(ptr++);
             if (CurrentCounter < -1)
                 CurrentCounter = -1;
             break;
@@ -549,8 +451,8 @@ int run_code_chunk(uint8_t *code_chunk)
             fprintf(stderr, "swap location<->roomflag[%d]. New location: %s\n", dv, Rooms[RoomSaved[dv]].Text);
 #endif
             temp = MyLoc;
-            MyLoc = RoomSaved[dv];
-            RoomSaved[dv] = temp;
+            MyLoc = RoomSaved[*ptr];
+            RoomSaved[*(ptr++)] = temp;
             Look();
             break;
 
@@ -563,12 +465,8 @@ int run_code_chunk(uint8_t *code_chunk)
 #endif
             {
                 int c1 = CurrentCounter;
-                if (dv > 15) {
-                    fprintf(stderr, "ERROR! parameter out of range. Max 15, got %d\n", dv);
-                    dv = 15;
-                }
-                CurrentCounter = Counters[dv];
-                Counters[dv] = c1;
+                CurrentCounter = Counters[*ptr];
+                Counters[*(ptr++)] = c1;
 #ifdef DEBUG_ACTIONS
                 fprintf(stderr, "Value of new selected counter is %d\n",
                     CurrentCounter);
@@ -609,20 +507,22 @@ int run_code_chunk(uint8_t *code_chunk)
                         Output(sys[MESSAGE_DELIMITER]);
                 }
             } else {
-                fprintf(stderr, "~ERR!: %04i) %02X %02X %02X~", index, code_chunk[0 + index], code_chunk[1 + index], code_chunk[2 + index]);
-                glk_exit();
+                index = ptr - code_chunk;
+                fprintf(stderr, "Unknown action %d [Param begins %d %d]\n",
+                        opcode, code_chunk[index], code_chunk[index + 1]);
+                break;
             }
             break;
         }
 
         if (dead) {
             DoneIt();
-            return 0;
+            return ACT_SUCCESS;
         }
 
-        /* we are on the 0xFF opcode, or have fallen through */
+        /* we are on the 0xff opcode, or have fallen through */
         if (run_code == 1 && try_index > 0) {
-            if (opcode == 0xFF) {
+            if (opcode == 0xff) {
                 run_code = 1;
             } else {
                 /* dropped out of TRY block */
@@ -632,13 +532,8 @@ int run_code_chunk(uint8_t *code_chunk)
                 try_index -= 1;
                 try[try_index] = 0;
                 run_code = 0;
+                ptr = code_chunk + index;
             }
-        } else {
-            /* continue */
-            if (opcode >= 183)
-                index += 1 + actions[(code_chunk[0 + index]) - 183].count;
-            else
-                index += 1;
         }
     }
 
@@ -654,7 +549,7 @@ void run_implicit(void)
     ptr = ti99_implicit_actions;
     loop_flag = 0;
 
-    /* fall out if no auto acts in the game. */
+    /* bail if no auto acts in the game. */
     if (*ptr == 0x0)
         loop_flag = 1;
 
@@ -679,47 +574,40 @@ void run_implicit(void)
 }
 
 /* parses verb noun actions */
-int run_explicit(int verb_num, int noun_num)
+ExplicitResultType run_explicit(int verb_num, int noun_num)
 {
     uint8_t *p;
-    int flag = 1;
-    int runcode;
+    ExplicitResultType flag = 1;
+    ActionResultType runcode;
 
     p = VerbActionOffsets[verb_num];
 
     /* process all code blocks for this verb
      until success or end. */
 
-    flag = RC_NULL;
-    while (flag == RC_NULL) {
+    flag = ER_NO_RESULT;
+    while (flag == ER_NO_RESULT) {
         /* we match VERB NOUN or VERB ANY */
         if (p[0] == noun_num || p[0] == 0) {
             /* we have verb/noun match. run code! */
 
             runcode = run_code_chunk(p + 2);
 
-            if (runcode == 0) { /* success */
-                return 0;
+            if (runcode == ACT_SUCCESS) {
+                return ER_SUCCESS;
             } else { /* failure */
                 if (p[1] == 0)
-                    flag = RC_RAN_ALL_BLOCKS_FAILED;
+                    flag = ER_RAN_ALL_LINES;
                 else
                     p += 1 + p[1];
             }
         } else {
             if (p[1] == 0)
-                flag = RC_RAN_ALL_BLOCKS;
+                flag = ER_RAN_ALL_LINES_NO_MATCH;
             else
                 p += 1 + p[1];
         }
     }
 
-    if (flag == RC_RAN_ALL_BLOCKS) {
-        return -2;
-    }
-
-    if (flag == RC_OK)
-        return 0;
-    else
-        return -1;
+    return flag;
 }

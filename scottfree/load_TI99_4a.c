@@ -147,7 +147,7 @@ GameIDType DetectTI994A(uint8_t **sf, size_t *extent)
     assert(file_length >= fix_address(fix_word(dh.p_explicit)));
     assert(file_length >= fix_address(fix_word(dh.p_implicit)));
 
-    return try_loading_ti994a(dh, 0);
+    return try_loading_ti994a(dh, Options & DEBUGGING);
 }
 
 uint8_t *get_TI994A_word(uint8_t *string, uint8_t **result, size_t *length)
@@ -533,13 +533,12 @@ int try_loading_ti994a(struct DATAHEADER dh, int loud)
     sys[INVENTORY] = "I'm carrying: ";
 
     title_screen = (char *)LoadTitleScreen();
+    free(entire_file);
 
     for (int i = 0; i < MAX_SYSMESS && sysdict_TI994A[i] != NULL; i++) {
         sys[i] = sysdict_TI994A[i];
     }
 
     Options |= TI994A_STYLE;
-
-    free(entire_file);
     return TI994A;
 }
