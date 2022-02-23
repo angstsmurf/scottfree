@@ -100,8 +100,7 @@ typedef enum
 
 #define MAX_SYSMESS LAST_SYSTEM_MESSAGE
 
-typedef enum
-{
+typedef enum {
     NOT_A_GAME,
     FOUR_LETTER_UNCOMPRESSED,
     THREE_LETTER_UNCOMPRESSED,
@@ -112,14 +111,12 @@ typedef enum
     SPANISH
 } dictionary_type;
 
-typedef enum
-{
+typedef enum {
     NO_TYPE,
     TEXT_ONLY,
 } game_type;
 
-typedef enum
-{
+typedef enum {
     ENGLISH = 0x1,
     MYSTERIOUS = 0x2,
     LOCALIZED = 0x4,
@@ -127,8 +124,7 @@ typedef enum
 } subtype;
 
 
-typedef enum
-{
+typedef enum {
     NO_PALETTE,
     ZX,
     ZXOPT,
@@ -137,22 +133,19 @@ typedef enum
     VGA
 } palette_type;
 
-typedef enum
-{
+typedef enum {
     NO_HEADER,
     EARLY,
     LATE
 } header_type;
 
-typedef enum
-{
+typedef enum {
     UNKNOWN_ACTIONS_TYPE,
     COMPRESSED,
     UNCOMPRESSED,
 } action_table_type;
 
-struct GameInfo
-{
+struct GameInfo {
     const char *Title;
 
     GameIDType gameID;
