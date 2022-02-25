@@ -1677,7 +1677,8 @@ void PrintTakenOrDropped(int index)
     if (last == 10 || last == 13)
         return;
     Output(" ");
-    if ((!(Options & TI994A_STYLE) && (CurrentCommand->allflag & LASTALL) != LASTALL) || split_screen == 0) {
+    if ((!(Options & TI994A_STYLE) && !(CurrentCommand->allflag & LASTALL))
+        || split_screen == 0) {
         Output("\n");
     }
 }
@@ -1798,7 +1799,7 @@ static ExplicitResultType PerformActions(int vb, int no)
             if (CurrentCommand->allflag) {
                 if (vb == TAKE && dark) {
                     Output(sys[TOO_DARK_TO_SEE]);
-                    while ((CurrentCommand->allflag & LASTALL) != LASTALL) {
+                    while (!(CurrentCommand->allflag & LASTALL)) {
                         CurrentCommand = CurrentCommand->next;
                     }
                     return ER_SUCCESS;
@@ -1807,7 +1808,7 @@ static ExplicitResultType PerformActions(int vb, int no)
                 int location = CARRIED;
                 if (vb == TAKE)
                     location = MyLoc;
-                while (Items[item].Location != location && (CurrentCommand->allflag & LASTALL) != LASTALL) {
+                while (Items[item].Location != location && !(CurrentCommand->allflag & LASTALL)) {
                     CurrentCommand = CurrentCommand->next;
                 }
                 if (Items[item].Location != location)
@@ -2045,11 +2046,12 @@ Distributed under the GNU software license\n\n");
 
         if (!stop_time)
             PerformActions(0, 0);
-        if (!(CurrentCommand && CurrentCommand->allflag && (CurrentCommand->allflag & LASTALL) != LASTALL))
+        if (!(CurrentCommand && CurrentCommand->allflag && !(CurrentCommand->allflag & LASTALL))) {
             Look();
 
-        if (!stop_time)
-            SaveUndo();
+            if (!stop_time)
+                SaveUndo();
+        }
 
         before_first_turn = 0;
 
