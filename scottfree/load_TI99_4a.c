@@ -163,6 +163,7 @@ uint8_t *GetTI994AWord(uint8_t *string, uint8_t **result, size_t *length)
     msg++;
     *result = MemAlloc(*length);
     memcpy(*result, msg, *length);
+
     msg += *length;
 
     return (msg);
@@ -232,6 +233,7 @@ void LoadTI994ADict(int vorn, uint16_t table, int num_words,
         } while (w1 == w2);
 
         word_len = w2 - w1;
+
         dict[i] = MemAlloc(word_len + 1);
         strncpy((char *)dict[i], w1, word_len);
     }
