@@ -103,6 +103,7 @@ extern struct SavedState *initial_state;
 int just_started = 1;
 int should_restart = 0;
 int stop_time = 0;
+
 int should_look_in_transcript = 0;
 int print_look_to_transcript = 0;
 int pause_next_room_description = 0;
@@ -562,7 +563,8 @@ int LoadDatabase(FILE *f, int loud)
     }
     if (loud)
         fprintf(stderr, "%d.\nLoad Complete.\n\n", ct);
-	fclose(f);
+
+    fclose(f);
     return SCOTTFREE;
 }
 
@@ -667,9 +669,9 @@ static void FlushRoomDescription(char *buf)
 {
     glk_stream_close(room_description_stream, 0);
 
-	strid_t StoredTranscript = Transcript;
-	if (!print_look_to_transcript)
-		Transcript = NULL;
+    strid_t StoredTranscript = Transcript;
+    if (!print_look_to_transcript)
+        Transcript = NULL;
 
     int print_delimiter = (Options & (TRS80_STYLE | SPECTRUM_STYLE | TI994A_STYLE));
 
@@ -730,27 +732,27 @@ static void FlushRoomDescription(char *buf)
         pause_next_room_description = 0;
     }
 
-	Transcript = StoredTranscript;
+    Transcript = StoredTranscript;
 }
 
 int ItemEndsWithPeriod(int item)
 {
-	if (item < 0 || item > GameHeader.NumItems)
-		return 0;
-	const char *desc = Items[item].Text;
-	if (desc != NULL && desc[0] != 0) {
-		const char lastchar = desc[strlen(desc) - 1];
-		if (lastchar == '.' || lastchar == '!') {
-			return 1;
-		}
-	}
-	return 0;
+    if (item < 0 || item > GameHeader.NumItems)
+        return 0;
+    const char *desc = Items[item].Text;
+    if (desc != NULL && desc[0] != 0) {
+        const char lastchar = desc[strlen(desc) - 1];
+        if (lastchar == '.' || lastchar == '!') {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void ListInventoryInUpperWindow(void)
 {
     int i = 0;
-	int lastitem = -1;
+    int lastitem = -1;
     WriteToRoomDescriptionStream("\n%s", sys[INVENTORY]);
     while (i <= GameHeader.NumItems) {
         if (Items[i].Location == CARRIED) {
@@ -762,7 +764,7 @@ void ListInventoryInUpperWindow(void)
             if (lastitem > -1 && (Options & (TRS80_STYLE | SPECTRUM_STYLE)) == 0) {
                 WriteToRoomDescriptionStream("%s", sys[ITEM_DELIMITER]);
             }
-			lastitem = i;
+            lastitem = i;
             WriteToRoomDescriptionStream("%s", Items[i].Text);
             if (Options & (TRS80_STYLE | SPECTRUM_STYLE)) {
                 WriteToRoomDescriptionStream("%s", sys[ITEM_DELIMITER]);
@@ -1165,7 +1167,7 @@ void ListInventory(void)
             if (lastitem > -1 && (Options & (TRS80_STYLE | SPECTRUM_STYLE)) == 0) {
                 Output(sys[ITEM_DELIMITER]);
             }
-			lastitem = i;
+            lastitem = i;
             Output(Items[i].Text);
             if (Options & (TRS80_STYLE | SPECTRUM_STYLE)) {
                 Output(sys[ITEM_DELIMITER]);
@@ -1175,11 +1177,11 @@ void ListInventory(void)
     }
     if (lastitem == -1)
         Output(sys[NOTHING]);
-	else if (Options & TI994A_STYLE) {
-		if (!ItemEndsWithPeriod(lastitem))
-			Output(".");
-		Output(" ");
-	}
+    else if (Options & TI994A_STYLE) {
+        if (!ItemEndsWithPeriod(lastitem))
+            Output(".");
+        Output(" ");
+    }
     if (Transcript) {
         glk_put_char_stream_uni(Transcript, 10);
     }
@@ -1190,7 +1192,7 @@ void LookWithPause(void)
     char fc = Rooms[MyLoc].Text[0];
     if (Rooms[MyLoc].Text == NULL || MyLoc == 0 || fc == 0 || fc == '.' || fc == ' ')
         return;
-	should_look_in_transcript = 1;
+    should_look_in_transcript = 1;
     pause_next_room_description = 1;
     Look();
 }
@@ -1239,92 +1241,92 @@ void PrintNoun(void)
 
 void MoveItemAToLocOfItemB(int itemA, int itemB)
 {
-	Items[itemA].Location = Items[itemB].Location;
-	if (Items[itemB].Location == MyLoc)
-		should_look_in_transcript = 1;
+    Items[itemA].Location = Items[itemB].Location;
+    if (Items[itemB].Location == MyLoc)
+        should_look_in_transcript = 1;
 }
 
 void GoToStoredLoc(void)
 {
 #ifdef DEBUG_ACTIONS
-	fprintf(stderr, "switch location to stored location (%d) (%s).\n",
-			SavedRoom, Rooms[SavedRoom].Text);
+    fprintf(stderr, "switch location to stored location (%d) (%s).\n",
+            SavedRoom, Rooms[SavedRoom].Text);
 #endif
-	int t = MyLoc;
-	MyLoc = SavedRoom;
-	SavedRoom = t;
-	should_look_in_transcript = 1;
+    int t = MyLoc;
+    MyLoc = SavedRoom;
+    SavedRoom = t;
+    should_look_in_transcript = 1;
 }
 
 void SwapLocAndRoomflag(int index)
 {
 #ifdef DEBUG_ACTIONS
-	fprintf(stderr, "swap location<->roomflag[%d]\n", index);
+    fprintf(stderr, "swap location<->roomflag[%d]\n", index);
 #endif
-	int temp = MyLoc;
-	MyLoc = RoomSaved[index];
-	RoomSaved[index] = temp;
-	should_look_in_transcript = 1;
-	Look();
+    int temp = MyLoc;
+    MyLoc = RoomSaved[index];
+    RoomSaved[index] = temp;
+    should_look_in_transcript = 1;
+    Look();
 }
 
 void SwapItemLocations(int itemA, int itemB)
 {
-	int temp = Items[itemA].Location;
-	Items[itemA].Location = Items[itemB].Location;
-	Items[itemB].Location = temp;
-	if (Items[itemA].Location == MyLoc || Items[itemB].Location == MyLoc)
-		should_look_in_transcript = 1;
+    int temp = Items[itemA].Location;
+    Items[itemA].Location = Items[itemB].Location;
+    Items[itemB].Location = temp;
+    if (Items[itemA].Location == MyLoc || Items[itemB].Location == MyLoc)
+        should_look_in_transcript = 1;
 }
 
 void PutItemAInRoomB(int itemA, int roomB)
 {
 #ifdef DEBUG_ACTIONS
-	fprintf(stderr, "Item %d (%s) is put in room %d (%s). MyLoc: %d (%s)\n",
-			itemA, Items[arg1].Text, roomB, Rooms[roomB].Text, MyLoc,
-			Rooms[MyLoc].Text);
+    fprintf(stderr, "Item %d (%s) is put in room %d (%s). MyLoc: %d (%s)\n",
+            itemA, Items[arg1].Text, roomB, Rooms[roomB].Text, MyLoc,
+            Rooms[MyLoc].Text);
 #endif
-	if (Items[itemA].Location == MyLoc || roomB == MyLoc) {
-		LookWithPause();
-	}
-	Items[itemA].Location = roomB;
+    if (Items[itemA].Location == MyLoc || roomB == MyLoc) {
+        LookWithPause();
+    }
+    Items[itemA].Location = roomB;
 }
 
 void SwapCounters(int index)
 {
 #ifdef DEBUG_ACTIONS
-	fprintf(stderr,
-			"Select a counter. Current counter is swapped with backup "
-			"counter %d\n",
-			index);
+    fprintf(stderr,
+            "Select a counter. Current counter is swapped with backup "
+            "counter %d\n",
+            index);
 #endif
-	if (index > 15) {
-		fprintf(stderr, "ERROR! parameter out of range. Max 15, got %d\n", index);
-		index = 15;
-	}
-	int temp = CurrentCounter;
+    if (index > 15) {
+        fprintf(stderr, "ERROR! parameter out of range. Max 15, got %d\n", index);
+        index = 15;
+    }
+    int temp = CurrentCounter;
 
-	CurrentCounter = Counters[index];
-	Counters[index] = temp;
+    CurrentCounter = Counters[index];
+    Counters[index] = temp;
 #ifdef DEBUG_ACTIONS
-	fprintf(stderr, "Value of new selected counter is %d\n",
-			CurrentCounter);
+    fprintf(stderr, "Value of new selected counter is %d\n",
+            CurrentCounter);
 #endif
 }
 
 void PrintMessage(int index)
 {
 #ifdef DEBUG_ACTIONS
-	fprintf(stderr, "Print message %d: \"%s\"\n", index,
-			Messages[index]);
+    fprintf(stderr, "Print message %d: \"%s\"\n", index,
+            Messages[index]);
 #endif
-	const char *message = Messages[index];
-	if (message != NULL && message[0] != 0) {
-		Output(message);
-		const char lastchar = message[strlen(message) - 1];
-		if (lastchar != 13 && lastchar != 10)
-			Output(sys[MESSAGE_DELIMITER]);
-	}
+    const char *message = Messages[index];
+    if (message != NULL && message[0] != 0) {
+        Output(message);
+        const char lastchar = message[strlen(message) - 1];
+        if (lastchar != 13 && lastchar != 10)
+            Output(sys[MESSAGE_DELIMITER]);
+    }
 }
 
 static ActionResultType PerformLine(int ct)
@@ -1334,7 +1336,7 @@ static ActionResultType PerformLine(int ct)
 #endif
     int continuation = 0, dead = 0;
     int param[5], pptr = 0;
-	int p;
+    int p;
     int act[4];
     int cc = 0;
     while (cc < 5) {
@@ -1508,9 +1510,9 @@ static ActionResultType PerformLine(int ct)
         fprintf(stderr, "Performing action %d: ", act[cc]);
 #endif
         if (act[cc] >= 1 && act[cc] < 52) {
-			PrintMessage(act[cc]);
+            PrintMessage(act[cc]);
         } else if (act[cc] > 101) {
-			PrintMessage(act[cc] - 50);
+            PrintMessage(act[cc] - 50);
         } else
             switch (act[cc]) {
             case 0: /* NOP */
@@ -1527,14 +1529,14 @@ static ActionResultType PerformLine(int ct)
                 fprintf(stderr, "item %d (\"%s\") is now in location.\n", param[pptr], Items[param[pptr]].Text);
 #endif
                 Items[param[pptr++]].Location = MyLoc;
-				should_look_in_transcript = 1;
+                should_look_in_transcript = 1;
                 break;
             case 54:
 #ifdef DEBUG_ACTIONS
                 fprintf(stderr, "player location is now room %d (%s).\n", param[pptr], Rooms[param[pptr]].Text);
 #endif
                 MyLoc = param[pptr++];
-				should_look_in_transcript = 1;
+                should_look_in_transcript = 1;
                 Look();
                 break;
             case 55:
@@ -1578,7 +1580,7 @@ static ActionResultType PerformLine(int ct)
                 break;
             case 62:
                 p = param[pptr++];
-				PutItemAInRoomB(p, param[pptr++]);
+                PutItemAInRoomB(p, param[pptr++]);
                 break;
             case 63:
 #ifdef DEBUG_ACTIONS
@@ -1617,7 +1619,7 @@ static ActionResultType PerformLine(int ct)
                 break;
             case 72:
                 p = param[pptr++];
-				SwapItemLocations(p, param[pptr++]);
+                SwapItemLocations(p, param[pptr++]);
                 break;
             case 73:
 #ifdef DEBUG_ACTIONS
@@ -1629,8 +1631,8 @@ static ActionResultType PerformLine(int ct)
                 Items[param[pptr++]].Location = CARRIED;
                 break;
             case 75:
-				p = param[pptr++];
-				MoveItemAToLocOfItemB(p, param[pptr++]);
+                p = param[pptr++];
+                MoveItemAToLocOfItemB(p, param[pptr++]);
                 break;
             case 76: /* Looking at adventure .. */
 #ifdef DEBUG_ACTIONS
@@ -1638,7 +1640,7 @@ static ActionResultType PerformLine(int ct)
 #endif
                 if (split_screen)
                     Look();
-				should_look_in_transcript = 1;
+                should_look_in_transcript = 1;
                 break;
             case 77:
                 if (CurrentCounter >= 1)
@@ -1658,10 +1660,10 @@ static ActionResultType PerformLine(int ct)
                 CurrentCounter = param[pptr++];
                 break;
             case 80:
-				GoToStoredLoc();
+                GoToStoredLoc();
                 break;
             case 81:
-				SwapCounters(param[pptr++]);
+                SwapCounters(param[pptr++]);
                 break;
             case 82:
                 CurrentCounter += param[pptr++];
@@ -1687,7 +1689,7 @@ static ActionResultType PerformLine(int ct)
                     Output("\n");
                 break;
             case 87:
-				SwapLocAndRoomflag(param[pptr++]);
+                SwapLocAndRoomflag(param[pptr++]);
                 break;
             case 88:
 #ifdef DEBUG_ACTIONS
@@ -1768,7 +1770,7 @@ static ExplicitResultType PerformActions(int vb, int no)
             if (Options & (SPECTRUM_STYLE | TI994A_STYLE))
                 Output(sys[OK]);
             MyLoc = nl;
-			should_look_in_transcript = 1;
+            should_look_in_transcript = 1;
             if (CurrentCommand && CurrentCommand->next) {
                 LookWithPause();
             }
@@ -2110,9 +2112,9 @@ Distributed under the GNU software license\n\n");
         if (!stop_time)
             PerformActions(0, 0);
         if (!(CurrentCommand && CurrentCommand->allflag && !(CurrentCommand->allflag & LASTALL))) {
-			print_look_to_transcript = should_look_in_transcript;
+            print_look_to_transcript = should_look_in_transcript;
             Look();
-			print_look_to_transcript = should_look_in_transcript = 0;
+            print_look_to_transcript = should_look_in_transcript = 0;
             if (!stop_time && !should_restart)
                 SaveUndo();
         }
