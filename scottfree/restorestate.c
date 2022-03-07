@@ -17,6 +17,7 @@ extern int RoomSaved[]; /* Range unknown */
 
 extern int stop_time;
 extern int just_started;
+int just_undid = 0;
 
 struct SavedState *initial_state = NULL;
 static struct SavedState *ramsave = NULL;
@@ -54,7 +55,7 @@ struct SavedState *SaveCurrentState(void)
 
 void RecoverFromBadRestore(struct SavedState *state)
 {
-    Output("BAD DATA! Invalid save file.\n");
+    Output(sys[BAD_DATA]);
     RestoreState(state);
     free(state);
 }
@@ -83,6 +84,10 @@ void RestoreState(struct SavedState *state)
 
 void SaveUndo(void)
 {
+    if (just_undid) {
+        just_undid = 0;
+        return;
+    }
     if (last_undo == NULL) {
         last_undo = SaveCurrentState();
         oldest_undo = last_undo;
@@ -111,11 +116,11 @@ void SaveUndo(void)
 void RestoreUndo(void)
 {
     if (just_started) {
-        Output("Can't undo on first turn.\n");
+        Output(sys[CANT_UNDO_ON_FIRST_TURN]);
         return;
     }
     if (last_undo == NULL || last_undo->previousState == NULL) {
-        Output("No more undo states stored.\n");
+        Output(sys[NO_UNDO_STATES]);
         return;
     }
     struct SavedState *current = last_undo;
@@ -127,6 +132,7 @@ void RestoreUndo(void)
     free(current->ItemLocations);
     free(current);
     number_of_undos--;
+    just_undid = 1;
 }
 
 void RamSave(void)
@@ -137,17 +143,17 @@ void RamSave(void)
     }
 
     ramsave = SaveCurrentState();
-    Output("State saved.\n");
+    Output(sys[STATE_SAVED]);
 }
 
 void RamRestore(void)
 {
     if (ramsave == NULL) {
-        Output("No saved state exists.\n");
+        Output(sys[NO_SAVED_STATE]);
         return;
     }
 
     RestoreState(ramsave);
-    Output("State restored.\n");
+    Output(sys[STATE_RESTORED]);
     SaveUndo();
 }
