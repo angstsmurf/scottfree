@@ -210,12 +210,16 @@ void OpenTopWindow(void)
 
 long BitFlags = 0; /* Might be >32 flags - I haven't seen >32 yet */
 
-void Fatal(const char *x)
-{
-    Display(Bottom, "%s\n", x);
+static void CleanupAndExit(void) {
     if (Transcript)
         glk_stream_close(Transcript, NULL);
     glk_exit();
+}
+
+void Fatal(const char *x)
+{
+    Display(Bottom, "%s\n", x);
+    CleanupAndExit();
 }
 
 static void ClearScreen(void)
@@ -537,7 +541,8 @@ int LoadDatabase(FILE *f, int loud)
         }
         ip->Location = (unsigned char)lo;
         if (loud)
-            fprintf(stderr, "Location of item %d: %d, \"%s\"\n", ct, ip->Location, ip->Location == 255 ? "CARRIED" : Rooms[ip->Location].Text);
+            fprintf(stderr, "Location of item %d: %d, \"%s\"\n", ct, ip->Location,
+                ip->Location == CARRIED ? "CARRIED" : Rooms[ip->Location].Text);
         ip->InitialLoc = ip->Location;
         ip++;
         ct++;
@@ -1207,9 +1212,7 @@ void DoneIt(void)
     if (YesOrNo()) {
         should_restart = 1;
     } else {
-        if (Transcript)
-            glk_stream_close(Transcript, NULL);
-        glk_exit();
+        CleanupAndExit();
     }
 }
 
@@ -1286,9 +1289,8 @@ void PutItemAInRoomB(int itemA, int roomB)
             itemA, Items[arg1].Text, roomB, Rooms[roomB].Text, MyLoc,
             Rooms[MyLoc].Text);
 #endif
-    if (Items[itemA].Location == MyLoc || roomB == MyLoc) {
+    if (Items[itemA].Location == MyLoc)
         LookWithPause();
-    }
     Items[itemA].Location = roomB;
 }
 
@@ -1327,6 +1329,16 @@ void PrintMessage(int index)
         if (lastchar != 13 && lastchar != 10)
             Output(sys[MESSAGE_DELIMITER]);
     }
+}
+
+void PlayerIsDead(void)
+{
+#ifdef DEBUG_ACTIONS
+    fprintf(stderr, "Player is dead\n");
+#endif
+    Output(sys[IM_DEAD]);
+    BitFlags &= ~(1 << DARKBIT);
+    MyLoc = GameHeader.NumRooms; /* It seems to be what the code says! */
 }
 
 static ActionResultType PerformLine(int ct)
@@ -1518,9 +1530,9 @@ static ActionResultType PerformLine(int ct)
             case 0: /* NOP */
                 break;
             case 52:
-                if (CountCarried() == GameHeader.MaxCarry) {
+                if (CountCarried() >= GameHeader.MaxCarry) {
                     Output(sys[YOURE_CARRYING_TOO_MUCH]);
-                    break;
+                    return ACT_SUCCESS;
                 }
                 Items[param[pptr++]].Location = CARRIED;
                 break;
@@ -1570,13 +1582,7 @@ static ActionResultType PerformLine(int ct)
                 BitFlags &= ~(1 << param[pptr++]);
                 break;
             case 61:
-#ifdef DEBUG_ACTIONS
-                fprintf(stderr, "Player is dead\n");
-#endif
-                Output(sys[IM_DEAD]);
-                LookWithPause();
-                BitFlags &= ~(1 << DARKBIT);
-                MyLoc = GameHeader.NumRooms; /* It seems to be what the code says! */
+                PlayerIsDead();
                 break;
             case 62:
                 p = param[pptr++];
@@ -1738,7 +1744,7 @@ void PrintTakenOrDropped(int index)
     if (last == 10 || last == 13)
         return;
     Output(" ");
-    if ((!(Options & TI994A_STYLE) && !(CurrentCommand->allflag & LASTALL))
+	if ((!(CurrentCommand->allflag & LASTALL))
         || split_screen == 0) {
         Output("\n");
     }
@@ -1777,23 +1783,21 @@ static ExplicitResultType PerformActions(int vb, int no)
             return ER_SUCCESS;
         }
         if (dark) {
+            BitFlags &= ~(1 << DARKBIT);
+            MyLoc = GameHeader.NumRooms; /* It seems to be what the code says! */
             Output(sys[YOU_FELL_AND_BROKE_YOUR_NECK]);
-            Output("\n\n");
-            Output(sys[PLAY_AGAIN]);
-            Output("\n");
-            if (YesOrNo()) {
-                should_restart = 1;
+            BitFlags &= ~(1 << DARKBIT);
+            MyLoc = GameHeader.NumRooms; /* It seems to be what the code says! */
                 return ER_SUCCESS;
-            } else {
-                if (Transcript)
-                    glk_stream_close(Transcript, NULL);
-                glk_exit();
-            }
         }
         Output(sys[YOU_CANT_GO_THAT_WAY]);
         return ER_SUCCESS;
     }
 
+    if (CurrentCommand && CurrentCommand->allflag && vb == CurrentCommand->verb && !(dark && vb == TAKE)) {
+        Output(Items[CurrentCommand->item].Text);
+        Output("....");
+    }
     flag = ER_RAN_ALL_LINES_NO_MATCH;
     if (CurrentGame != TI994A) {
         while (ct <= GameHeader.NumActions) {
@@ -1810,7 +1814,7 @@ static ExplicitResultType PerformActions(int vb, int no)
             verbvalue /= 150;
             if ((verbvalue == vb) || (doagain && Actions[ct].Vocab == 0)) {
                 if ((verbvalue == 0 && RandomPercent(nounvalue)) || doagain || (verbvalue != 0 && (nounvalue == no || nounvalue == 0))) {
-                    if (verbvalue == vb && vb != 0 && no != 0 && nounvalue == no)
+                    if (verbvalue == vb && vb != 0 && nounvalue == no)
                         found_match = 1;
                     ActionResultType flag2;
                     if (flag == ER_RAN_ALL_LINES_NO_MATCH)
@@ -1877,8 +1881,6 @@ static ExplicitResultType PerformActions(int vb, int no)
                 }
                 if (Items[item].Location != location)
                     return ER_SUCCESS;
-                Output(Items[CurrentCommand->item].Text);
-                Output("....");
             }
 
             /* Yes they really _are_ hardcoded values */
@@ -1887,7 +1889,7 @@ static ExplicitResultType PerformActions(int vb, int no)
                     Output(sys[WHAT]);
                     return ER_SUCCESS;
                 }
-                if (CountCarried() == GameHeader.MaxCarry) {
+                if (CountCarried() >= GameHeader.MaxCarry) {
                     Output(sys[YOURE_CARRYING_TOO_MUCH]);
                     return ER_SUCCESS;
                 }
