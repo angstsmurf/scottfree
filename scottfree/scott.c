@@ -2078,7 +2078,9 @@ void glk_main(void)
 
     glk_stylehint_set(wintype_TextBuffer, style_User1, stylehint_Proportional, 0);
     glk_stylehint_set(wintype_TextBuffer, style_User1, stylehint_Indentation, 20);
-    glk_stylehint_set(wintype_TextBuffer, style_User1, stylehint_ParaIndentation, 20);
+    glk_stylehint_set(wintype_TextBuffer, style_User1, stylehint_ParaIndentation,
+        20);
+    glk_stylehint_set(wintype_TextBuffer, style_Preformatted, stylehint_Justification, stylehint_just_Centered);
 
     Bottom = glk_window_open(0, 0, 0, wintype_TextBuffer, GLK_BUFFER_ROCK);
     if (Bottom == NULL)
