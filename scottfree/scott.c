@@ -320,14 +320,14 @@ static char *ReadString(FILE *f)
         if (c == '\n')
             tmp[ct++] = 10;
         /* Special case: assume CR is part of CRLF in a
-		 * DOS-formatted file, and ignore it.
-		 */
+         * DOS-formatted file, and ignore it.
+         */
         else if (c == 13)
             ;
         /* Pass only ASCII to Glk; the other reasonable option
-		 * would be to pass Latin-1, but it's probably safe to
-		 * assume that Scott Adams games are ASCII only.
-		 */
+         * would be to pass Latin-1, but it's probably safe to
+         * assume that Scott Adams games are ASCII only.
+         */
         else if ((c >= 32 && c <= 126))
             tmp[ct++] = c;
         else
@@ -399,7 +399,7 @@ int LoadDatabase(FILE *f, int loud)
     if (fscanf(f, "%*d %d %d %d %d %d %d %d %d %d %d %d",
             &ni, &na, &nw, &nr, &mc, &pr, &tr, &wl, &lt, &mn, &trm)
         < 10) {
-        //		fprintf(stderr, "Invalid database(bad header)\n");
+        //      fprintf(stderr, "Invalid database(bad header)\n");
         return 0;
     }
     GameHeader.NumItems = ni;
@@ -1682,7 +1682,7 @@ static ActionResultType PerformLine(int ct)
                 if (CurrentCounter < -1)
                     CurrentCounter = -1;
                 /* Note: This seems to be needed. I don't yet
-				 know if there is a maximum value to limit too */
+                 know if there is a maximum value to limit too */
                 break;
             case 84:
                 if (CurrentCommand)
@@ -1747,7 +1747,7 @@ void PrintTakenOrDropped(int index)
     if (last == 10 || last == 13)
         return;
     Output(" ");
-	if ((!(CurrentCommand->allflag & LASTALL))
+    if ((!(CurrentCommand->allflag & LASTALL))
         || split_screen == 0) {
         Output("\n");
     }
