@@ -358,52 +358,6 @@ const char *ExtraCommands[NUMBER_OF_EXTRA_COMMANDS] = {
     " ", " ", " ", " ", " "
 };
 
-const char *GermanExtraCommands[NUMBER_OF_EXTRA_COMMANDS] = {
-    NULL,
-    "restart",
-    "save",
-    "restore",
-    "load",
-    "transcript",
-    "script",
-    "oops",
-    "undo",
-    "ram",
-    "ramload",
-    "ramrestore",
-    "ramsave",
-    "ausser",
-    "bis",
-    "laden",
-    "wiederherstellen",
-    "transkript",
-    "rueckgaengig",
-    "neustarten"
-};
-
-const char *SpanishExtraCommands[NUMBER_OF_EXTRA_COMMANDS] = {
-    NULL,
-    "restart",
-    "save",
-    "restore",
-    "load",
-    "transcript",
-    "script",
-    "oops",
-    "undo",
-    "ram",
-    "ramload",
-    "ramrestore",
-    "ramsave",
-    "excepto",
-    "menos",
-    "reanuda",
-    "cargar",
-    "transcripcion",
-    "deshacer",
-    "reinicia"
-};
-
 extra_command ExtraCommandsKey[NUMBER_OF_EXTRA_COMMANDS] = {
     NO_COMMAND, RESTART, SAVE, RESTORE, RESTORE, SCRIPT, SCRIPT,
     UNDO, UNDO, RAM, RAMLOAD, RAMLOAD, RAMSAVE, EXCEPT, EXCEPT,
