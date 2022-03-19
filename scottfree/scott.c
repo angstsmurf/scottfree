@@ -727,8 +727,6 @@ static void FlushRoomDescription(char *buf)
         Display(Bottom, "%s", buf);
     }
 
-    free(buf);
-
     if (print_delimiter) {
         PrintWindowDelimiter();
     }
@@ -739,6 +737,10 @@ static void FlushRoomDescription(char *buf)
     }
 
     Transcript = StoredTranscript;
+    if (buf != NULL) {
+        free(buf);
+        buf = NULL;
+    }
 }
 
 int ItemEndsWithPeriod(int item)
