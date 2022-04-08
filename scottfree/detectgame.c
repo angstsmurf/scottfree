@@ -83,7 +83,7 @@ void PrintHeaderInfo(int *h, int ni, int na, int nw, int nr, int mc, int pr, int
     fprintf(stderr, "Word length =\t%d\n", wl);
     fprintf(stderr, "Number of messages =\t%d\n", mn);
     fprintf(stderr, "Player start location: %d\n", pr);
-    fprintf(stderr, "Treasure room: %d\n", tr);
+    fprintf(stderr, "Treasure room: %d\n", trm);
     fprintf(stderr, "Lightsource time left: %d\n", lt);
     fprintf(stderr, "Number of treasures: %d\n", tr);
 }
@@ -124,7 +124,7 @@ GameIDType DetectGame(const char *file_name)
         if (result == 0)
             Fatal("File empty or read error!");
 
-        CurrentGame = DetectTI994A(&entire_file, &file_length);
+        CurrentGame = DetectTI994A();
     }
 
     return CurrentGame;
