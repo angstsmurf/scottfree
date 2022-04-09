@@ -22,8 +22,7 @@ struct Command {
     struct Command *next;
 };
 
-typedef enum
-{
+typedef enum {
     NO_COMMAND,
     RESTART,
     SAVE,
@@ -73,7 +72,7 @@ extern const char *EnglishDelimiterList[];
 extern const char *GermanDelimiterList[];
 extern const char *DelimiterList[];
 
-#define NUMBER_OF_EXTRA_COMMANDS 20
+#define NUMBER_OF_EXTRA_COMMANDS 32
 extern const char *ExtraCommands[];
 
 #define NUMBER_OF_EXTRA_NOUNS 16
@@ -81,7 +80,7 @@ extern const char *ExtraCommands[];
 extern const char *EnglishExtraNouns[];
 extern const char *GermanExtraNouns[];
 extern const char *SpanishExtraNouns[];
-extern const char *ExtraNouns[] ;
-extern extra_command ExtraNounsKey[] ;
+extern const char *ExtraNouns[];
+extern extra_command ExtraNounsKey[];
 
 #endif /* parser_h */
