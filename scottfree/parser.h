@@ -8,8 +8,8 @@
 #ifndef parser_h
 #define parser_h
 
-#include "glk.h"
 #include <stdio.h>
+#include "glk.h"
 
 struct Command {
     int verb;
@@ -22,7 +22,8 @@ struct Command {
     struct Command *next;
 };
 
-typedef enum {
+typedef enum
+{
     NO_COMMAND,
     RESTART,
     SAVE,

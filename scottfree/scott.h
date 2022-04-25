@@ -155,6 +155,4 @@ extern int stop_time;
 extern int should_look_in_transcript;
 extern strid_t InputRecording;
 
-
-
 #endif /* scott_h */
